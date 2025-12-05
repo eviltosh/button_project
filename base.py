@@ -69,11 +69,11 @@ if st.session_state.sidebar_open:
         st.markdown('<div class="sidebar-top-right neon-purple">', unsafe_allow_html=True)
         if st.button("Close"):
 
-            # instant collapse
+            # instant collapse (visual) before rerun
             st.markdown("""
                 <script>
                     const sb = window.parent.document.querySelector('section[data-testid="stSidebar"]');
-                    if (sb) { sb.style.transform = "translateX(-100%)"; }
+                    if (sb) { sb.style.transform = "translateX(-100%)"; sb.style.pointerEvents = "none"; }
                 </script>
             """, unsafe_allow_html=True)
 
@@ -88,6 +88,7 @@ if st.session_state.sidebar_open:
 # -------------------------
 else:
 
+    # FORCE the green button container to top-right with high-specificity !important
     st.markdown("""
     <style>
         [data-testid="stSidebar"] {
@@ -96,13 +97,20 @@ else:
             visibility: hidden !important;
         }
 
-        /* FORCE GREEN BUTTON TOP-RIGHT */
+        /* Strong override to force top-right placement */
         div.green-floating {
             position: fixed !important;
             top: 10px !important;
-            right: 10px !important;
+            right: 10px !important;    /* << ensured top-right */
             left: auto !important;
-            z-index: 2000 !important;
+            transform: none !important;
+            z-index: 9999 !important;
+            pointer-events: auto !important;
+        }
+
+        /* additionally ensure the inner button is visible on top */
+        div.green-floating button {
+            z-index: 10000 !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -110,11 +118,11 @@ else:
     st.markdown('<div class="green-floating neon-green">', unsafe_allow_html=True)
     if st.button("Open"):
 
-        # instant expand
+        # instant expand (visual) before rerun
         st.markdown("""
             <script>
                 const sb = window.parent.document.querySelector('section[data-testid="stSidebar"]');
-                if (sb) { sb.style.transform = "translateX(0)"; }
+                if (sb) { sb.style.transform = "translateX(0)"; sb.style.pointerEvents = "auto"; }
             </script>
         """, unsafe_allow_html=True)
 

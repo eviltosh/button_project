@@ -1,5 +1,1 @@
 streamlit
-streamlit-custom-sidebar
-streamlit-float
-streamlit-local-storage
-streamlit-javascript

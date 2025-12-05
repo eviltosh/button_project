@@ -1,9 +1,9 @@
 import streamlit as st
 
-# --- FORCE SIDEBAR EXPANDED ---
+# Force sidebar expanded
 st.set_page_config(initial_sidebar_state="expanded")
 
-# --- CUSTOM CSS FOR PURPLE NEON BUTTON TOP-RIGHT ---
+# --- CUSTOM CSS FOR PURPLE NEON BUTTON ---
 st.markdown("""
     <style>
     /* Sidebar container */
@@ -21,7 +21,7 @@ st.markdown("""
         z-index: 9999;
     }
 
-    /* Neon purple button style */
+    /* Neon purple button */
     .neon-btn {
         padding: 8px 18px;
         color: white;
@@ -42,15 +42,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- PLACE THE BUTTON IN THE SIDEBAR ---
+# --- SIDEBAR CONTENT ---
 with st.sidebar:
-    # Inject custom button at absolute top-right
     st.markdown("""
         <div class="neon-btn-container">
             <button class="neon-btn" onclick="window.location.href='#'">PRESS</button>
         </div>
     """, unsafe_allow_html=True)
 
-    # Normal sidebar content below
     st.header("Sidebar Content")
-    st.write("Corporal’s operational sidebar is now online.")
+    st.write("Operational neon button online, Corporal.")
+
+# Main app
+st.title("Neon Button Test App")
+st.write("Sidebar with top-right neon button loaded successfully.")

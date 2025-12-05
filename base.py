@@ -28,14 +28,26 @@ else:
 
 
 # -------------------------
-# TOP-RIGHT OPEN BUTTON (MAIN AREA)
+# TOP-RIGHT OPEN BUTTON (MAIN AREA) — NEW POSITION
 # -------------------------
 if not st.session_state.sidebar_open:
-    col1, col2 = st.columns([8, 1])  # right-align
-    with col2:
-        if st.button("Open", key="open_btn"):
-            st.session_state.sidebar_open = True
-            st.rerun()
+
+    st.markdown("""
+    <style>
+        #open-button-fixed {
+            position: fixed;
+            top: 20px;         /* move up */
+            left: 75vw;        /* 75% across horizontally */
+            z-index: 9999;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div id="open-button-fixed">', unsafe_allow_html=True)
+    if st.button("Open", key="open_btn"):
+        st.session_state.sidebar_open = True
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # -------------------------
@@ -53,5 +65,5 @@ if st.session_state.sidebar_open:
 # -------------------------
 # MAIN
 # -------------------------
-st.title("New Method: Column-Aligned Toggle")
+st.title("New Method: Column-Aligned Toggle + Fixed Open Button")
 st.write("No JS. No DOM. No crashes. Guaranteed to render.")

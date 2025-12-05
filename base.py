@@ -8,7 +8,7 @@ if "sidebar_open" not in st.session_state:
 
 
 # -------------------------
-# BASE CSS
+# BASE CSS (unchanged)
 # -------------------------
 st.markdown("""
 <style>
@@ -54,6 +54,8 @@ if st.session_state.sidebar_open:
             min-width: 300px !important;
             visibility: visible !important;
         }
+
+        /* Purple button top-right inside sidebar */
         .sidebar-top-right {
             position: absolute;
             top: 10px;
@@ -94,12 +96,13 @@ else:
             visibility: hidden !important;
         }
 
-        /* GREEN BUTTON NOW TOP-RIGHT */
-        .green-floating {
-            position: fixed;
-            top: 10px;
-            right: 10px;   /* << CHANGED FROM left:10px */
-            z-index: 2000;
+        /* FORCE GREEN BUTTON TOP-RIGHT */
+        div.green-floating {
+            position: fixed !important;
+            top: 10px !important;
+            right: 10px !important;
+            left: auto !important;
+            z-index: 2000 !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -126,4 +129,3 @@ else:
 # -------------------------
 st.title("Sidebar Toggle Test")
 st.write("Purple button = collapse. Green button = expand.")
-

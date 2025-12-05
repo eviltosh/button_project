@@ -1,7 +1,12 @@
+import os
 import streamlit as st
+
+
 
 # Force sidebar expanded
 st.set_page_config(initial_sidebar_state="expanded")
+
+st.write("Running file:", os.path.abspath(__file__))
 
 # --- CUSTOM CSS FOR PURPLE NEON BUTTON ---
 st.markdown("""

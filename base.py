@@ -3,9 +3,26 @@ import streamlit as st
 if "sidebar_open" not in st.session_state:
     st.session_state.sidebar_open = True
 
-# -------------------------
-# CSS COLLAPSE / EXPAND
-# -------------------------
+
+# ============================================================
+#   TOP-RIGHT ANCHOR USING st.empty()  (NEW METHOD)
+# ============================================================
+
+top_anchor = st.empty()   # Always stays at top of page
+
+with top_anchor.container():
+    if not st.session_state.sidebar_open:
+        c1, c2 = st.columns([12, 1])  # right-aligned anchor
+        with c2:
+            if st.button("Open", key="open_btn"):
+                st.session_state.sidebar_open = True
+                st.rerun()
+
+
+# ============================================================
+#   CSS COLLAPSE / EXPAND (unchanged, safe)
+# ============================================================
+
 if st.session_state.sidebar_open:
     st.markdown("""
     <style>
@@ -26,29 +43,23 @@ else:
     </style>
     """, unsafe_allow_html=True)
 
-# -------------------------
-# HEADER-PLACED OPEN BUTTON (Streamlit top-right system bar)
-# -------------------------
-if not st.session_state.sidebar_open:
-    top_cols = st.columns([15, 1])   # rightmost column is ALWAYS at the top-right
-    with top_cols[1]:
-        if st.button("Open", key="header_open"):
-            st.session_state.sidebar_open = True
-            st.rerun()
 
-# -------------------------
-# SIDEBAR CONTENT + CLOSE BUTTON
-# -------------------------
+# ============================================================
+#   SIDEBAR CONTENT + CLOSE BUTTON
+# ============================================================
+
 if st.session_state.sidebar_open:
     with st.sidebar:
-        colA, colB = st.columns([3, 1])
-        with colB:
+        cA, cB = st.columns([3, 1])
+        with cB:
             if st.button("Close", key="close_btn"):
                 st.session_state.sidebar_open = False
                 st.rerun()
 
-# -------------------------
-# MAIN
-# -------------------------
-st.title("Header-Aligned Top-Right Open Button")
-st.write("This method uses Streamlit’s header area for perfect top-right placement.")
+
+# ============================================================
+#   MAIN CONTENT
+# ============================================================
+
+st.title("ANCHOR METHOD — TOP RIGHT BUTTON")
+st.write("Using st.empty() as a persistent top-right anchor.")

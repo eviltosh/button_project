@@ -1,91 +1,66 @@
-# ====== INSTALL REQUIREMENT FIRST ======
-# pip install streamlit-custom-sidebar streamlit-float
-
+import os
 import streamlit as st
-from streamlit_custom_sidebar import CustomSidebarDefault
-import streamlit_float
 
-# Page config
-st.set_page_config(layout="wide")
 
-# Initialize custom sidebar
-streamlit_float.float_init(include_unstable_primary=False)
 
-# Sidebar data (example — can be empty or customised)
-data_ = [
-    {"index": 0, "label": "Home", "page": "home", "href": "#"},
-    {"index": 1, "label": "Settings", "page": "settings", "href": "#"}
-]
+# Force sidebar expanded
+st.set_page_config(initial_sidebar_state="expanded")
 
-if "currentPage" not in st.session_state:
-    st.session_state["currentPage"] = data_[0]
-else:
-    st.session_state["currentPage"] = data_[0]
+import os, glob, streamlit as st
+st.write("PY FILES IN THIS PROJECT:", glob.glob("*.py"))
 
-# Render custom sidebar
-with st.container():
-    custom = CustomSidebarDefault(
-        closeNavOnLoad=False,
-        backgroundColor="#111",
-        loadPageName="home",
-        data=data_,
-        LocalOrSessionStorage=1,
-        serverRendering=False,
-        webMedium="local"
-    )
-    custom.load_custom_sidebar()
-    custom.change_page()
-    streamlit_float.float_parent(css="position:fixed; top:-1000px;")
+st.write("Running file:", os.path.abspath(__file__))
 
-# Now inject open/close buttons manually at precise positions
+# --- CUSTOM CSS FOR PURPLE NEON BUTTON ---
 st.markdown("""
-<style>
-/* Purple neon close button — top right of sidebar panel */
-#sidebar-close-button button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #b300ff !important;
-    color: white !important;
-    border: 2px solid #ff00ff !important;
-    border-radius: 8px !important;
-    font-weight: bold !important;
-    box-shadow: 0 0 10px #ff00ff !important;
-    z-index: 10000;
-}
-/* Green neon open button — top right of main page */
-#sidebar-open-button button {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background-color: #00ff00 !important;
-    color: black !important;
-    border: 2px solid #00ffaa !important;
-    border-radius: 8px !important;
-    font-weight: bold !important;
-    box-shadow: 0 0 10px #00ff00 !important;
-    z-index: 10000;
-}
-</style>
+    <style>
+    /* Sidebar container */
+    [data-testid="stSidebar"] {
+        background-color: #0b0b0f;
+        padding-top: 20px;
+        position: relative;
+    }
+
+    /* Container for right-aligned button */
+    .neon-btn-container {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        z-index: 9999;
+    }
+
+    /* Neon purple button */
+    .neon-btn {
+        padding: 8px 18px;
+        color: white;
+        background: #7d00ff;
+        border: 2px solid #c878ff;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        text-shadow: 0 0 8px #d18dff;
+        box-shadow: 0 0 12px #b14fff, 0 0 20px #7d00ff;
+        transition: 0.2s ease-in-out;
+    }
+
+    .neon-btn:hover {
+        box-shadow: 0 0 20px #c878ff, 0 0 40px #a040ff;
+        transform: scale(1.06);
+    }
+    </style>
 """, unsafe_allow_html=True)
 
-# Show open/close buttons based on sidebar state
-if custom.is_sidebar_visible():
-    st.markdown('<div id="sidebar-close-button"><button id="close">Close Sidebar</button></div>', unsafe_allow_html=True)
-else:
-    st.markdown('<div id="sidebar-open-button"><button id="open">Open Sidebar</button></div>', unsafe_allow_html=True)
+# --- SIDEBAR CONTENT ---
+with st.sidebar:
+    st.markdown("""
+        <div class="neon-btn-container">
+            <button class="neon-btn" onclick="window.location.href='#'">PRESS</button>
+        </div>
+    """, unsafe_allow_html=True)
 
-# Listen to button clicks via query params — simple but workable
-params = st.experimental_get_query_params()
-if "open" in params:
-    custom.show()
-    st.experimental_set_query_params()
-    st.experimental_rerun()
-if "close" in params:
-    custom.hide()
-    st.experimental_set_query_params()
-    st.experimental_rerun()
+    st.header("Sidebar Content")
+    st.write("Operational neon button online, Corporal.")
 
-# Main content
-st.title("Custom Sidebar with Reliable Toggle")
-st.write("Using a third-party sidebar component for full control.")
+# Main app
+st.title("Neon Button Test App")
+st.write("Sidebar with top-right neon button load

@@ -1,94 +1,57 @@
 import streamlit as st
 
-# ---- STATE ----
-if "panel_open" not in st.session_state:
-    st.session_state.panel_open = True
+if "sidebar_open" not in st.session_state:
+    st.session_state.sidebar_open = True
 
-# ---- BASE CSS: Custom Left Panel ----
-st.markdown(f"""
-<style>
+# -------------------------
+# CSS COLLAPSE / EXPAND
+# -------------------------
+if st.session_state.sidebar_open:
+    st.markdown("""
+    <style>
+        [data-testid="stSidebar"] {
+            width: 300px !important;
+            min-width: 300px !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+        [data-testid="stSidebar"] {
+            width: 0 !important;
+            min-width: 0 !important;
+            overflow: hidden !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-    /* MAIN CUSTOM PANEL */
-    #panel {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 260px;
-        height: 100vh;
-        background: #111;
-        border-right: 3px solid #b300ff;
-        padding: 20px;
-        transition: transform 0.3s ease;
-        transform: translateX({ '0' if st.session_state.panel_open else '-105%' });
-        z-index: 9000;
-        overflow-y: auto;
-    }}
 
-    /* Purple CLOSE button inside panel (top-right) */
-    #close-btn {{
-        position: absolute;
-        top: 10px;
-        right: 10px;
-    }}
-    #close-btn button {{
-        background-color: #b300ff !important;
-        color: white !important;
-        border: 2px solid #ff00ff !important;
-        border-radius: 8px !important;
-        font-weight: bold !important;
-        box-shadow: 0 0 12px #ff00ff !important;
-    }}
+# -------------------------
+# TOP-RIGHT OPEN BUTTON (MAIN AREA)
+# -------------------------
+if not st.session_state.sidebar_open:
+    col1, col2 = st.columns([8, 1])  # right-align
+    with col2:
+        if st.button("Open", key="open_btn"):
+            st.session_state.sidebar_open = True
+            st.rerun()
 
-    /* Green OPEN button (top-right of screen) */
-    #open-btn {{
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 9500;
-        display: { 'none' if st.session_state.panel_open else 'block' };
-    }}
-    #open-btn button {{
-        background-color: #00ff00 !important;
-        color: black !important;
-        border: 2px solid #00ffaa !important;
-        border-radius: 8px !important;
-        font-weight: bold !important;
-        box-shadow: 0 0 12px #00ff00 !important;
-    }}
 
-</style>
-""", unsafe_allow_html=True)
+# -------------------------
+# SIDEBAR CONTENT + CLOSE BUTTON
+# -------------------------
+if st.session_state.sidebar_open:
+    with st.sidebar:
+        colA, colB = st.columns([4, 1])
+        with colB:
+            if st.button("Close", key="close_btn"):
+                st.session_state.sidebar_open = False
+                st.rerun()
 
-# ---- PANEL HTML ----
-st.markdown("""
-<div id="panel">
-    <div id="close-btn">
-        <form><button name="close" value="1">Close</button></form>
-    </div>
-    <h2 style="color:white;">Custom Panel</h2>
-    <p style="color:#ccc;">Fully controllable sidebar replacement.</p>
-</div>
-""", unsafe_allow_html=True)
 
-# ---- OPEN BUTTON ----
-st.markdown("""
-<div id="open-btn">
-    <form><button name="open" value="1">Open</button></form>
-</div>
-""", unsafe_allow_html=True)
-
-# ---- BUTTON LOGIC ----
-qs = st.query_params
-if "close" in qs:
-    st.session_state.panel_open = False
-    st.query_params.clear()
-    st.rerun()
-
-if "open" in qs:
-    st.session_state.panel_open = True
-    st.query_params.clear()
-    st.rerun()
-
-# ---- MAIN CONTENT ----
-st.title("UNBREAKABLE CUSTOM SIDEBAR")
-st.write("This is your new sidebar. It will NEVER break again.")
+# -------------------------
+# MAIN
+# -------------------------
+st.title("New Method: Column-Aligned Toggle")
+st.write("No JS. No DOM. No crashes. Guaranteed to render.")

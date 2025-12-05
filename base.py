@@ -23,35 +23,25 @@ else:
             min-width: 0 !important;
             overflow: hidden !important;
         }
-
-        /* TRUE TOP-RIGHT OPEN BUTTON */
-        #open-fixed {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 999999;
-        }
     </style>
     """, unsafe_allow_html=True)
 
 # -------------------------
-# TOP-RIGHT OPEN BUTTON (FIXED POSITION)
+# HEADER-PLACED OPEN BUTTON (Streamlit top-right system bar)
 # -------------------------
 if not st.session_state.sidebar_open:
-
-    st.markdown('<div id="open-fixed">', unsafe_allow_html=True)
-    if st.button("Open", key="open_btn"):
-        st.session_state.sidebar_open = True
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-
+    top_cols = st.columns([15, 1])   # rightmost column is ALWAYS at the top-right
+    with top_cols[1]:
+        if st.button("Open", key="header_open"):
+            st.session_state.sidebar_open = True
+            st.rerun()
 
 # -------------------------
 # SIDEBAR CONTENT + CLOSE BUTTON
 # -------------------------
 if st.session_state.sidebar_open:
     with st.sidebar:
-        colA, colB = st.columns([4, 1])
+        colA, colB = st.columns([3, 1])
         with colB:
             if st.button("Close", key="close_btn"):
                 st.session_state.sidebar_open = False
@@ -60,5 +50,5 @@ if st.session_state.sidebar_open:
 # -------------------------
 # MAIN
 # -------------------------
-st.title("New Method: Column-Aligned Toggle (Top-Right Open Button)")
-st.write("No JS. No DOM. No crashes. Guaranteed to render.")
+st.title("Header-Aligned Top-Right Open Button")
+st.write("This method uses Streamlit’s header area for perfect top-right placement.")

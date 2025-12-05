@@ -23,27 +23,23 @@ else:
             min-width: 0 !important;
             overflow: hidden !important;
         }
-    </style>
-    """, unsafe_allow_html=True)
 
-
-# -------------------------
-# TOP-RIGHT OPEN BUTTON (MAIN AREA) — NEW POSITION
-# -------------------------
-if not st.session_state.sidebar_open:
-
-    st.markdown("""
-    <style>
-        #open-button-fixed {
+        /* TRUE TOP-RIGHT OPEN BUTTON */
+        #open-fixed {
             position: fixed;
-            top: 20px;         /* move up */
-            left: 75vw;        /* 75% across horizontally */
-            z-index: 9999;
+            top: 10px;
+            right: 10px;
+            z-index: 999999;
         }
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div id="open-button-fixed">', unsafe_allow_html=True)
+# -------------------------
+# TOP-RIGHT OPEN BUTTON (FIXED POSITION)
+# -------------------------
+if not st.session_state.sidebar_open:
+
+    st.markdown('<div id="open-fixed">', unsafe_allow_html=True)
     if st.button("Open", key="open_btn"):
         st.session_state.sidebar_open = True
         st.rerun()
@@ -61,9 +57,8 @@ if st.session_state.sidebar_open:
                 st.session_state.sidebar_open = False
                 st.rerun()
 
-
 # -------------------------
 # MAIN
 # -------------------------
-st.title("New Method: Column-Aligned Toggle + Fixed Open Button")
+st.title("New Method: Column-Aligned Toggle (Top-Right Open Button)")
 st.write("No JS. No DOM. No crashes. Guaranteed to render.")

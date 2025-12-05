@@ -1,85 +1,94 @@
 import streamlit as st
 
-if "sidebar_open" not in st.session_state:
-    st.session_state.sidebar_open = True
+# ---- STATE ----
+if "panel_open" not in st.session_state:
+    st.session_state.panel_open = True
 
-st.markdown("""
+# ---- BASE CSS: Custom Left Panel ----
+st.markdown(f"""
 <style>
-    [data-testid="stSidebar"] {
-        transition: all 0.25s ease-in-out;
-    }
 
-    .neon-purple button {
+    /* MAIN CUSTOM PANEL */
+    #panel {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 260px;
+        height: 100vh;
+        background: #111;
+        border-right: 3px solid #b300ff;
+        padding: 20px;
+        transition: transform 0.3s ease;
+        transform: translateX({ '0' if st.session_state.panel_open else '-105%' });
+        z-index: 9000;
+        overflow-y: auto;
+    }}
+
+    /* Purple CLOSE button inside panel (top-right) */
+    #close-btn {{
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }}
+    #close-btn button {{
         background-color: #b300ff !important;
         color: white !important;
         border: 2px solid #ff00ff !important;
         border-radius: 8px !important;
         font-weight: bold !important;
-        box-shadow: 0 0 10px #ff00ff, 0 0 20px #b300ff !important;
-    }
+        box-shadow: 0 0 12px #ff00ff !important;
+    }}
 
-    .neon-green button {
+    /* Green OPEN button (top-right of screen) */
+    #open-btn {{
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 9500;
+        display: { 'none' if st.session_state.panel_open else 'block' };
+    }}
+    #open-btn button {{
         background-color: #00ff00 !important;
         color: black !important;
         border: 2px solid #00ffaa !important;
         border-radius: 8px !important;
         font-weight: bold !important;
-        box-shadow: 0 0 10px #00ff00, 0 0 20px #00aa00 !important;
-    }
+        box-shadow: 0 0 12px #00ff00 !important;
+    }}
+
 </style>
 """, unsafe_allow_html=True)
 
-# -------- OPEN STATE --------
-if st.session_state.sidebar_open:
+# ---- PANEL HTML ----
+st.markdown("""
+<div id="panel">
+    <div id="close-btn">
+        <form><button name="close" value="1">Close</button></form>
+    </div>
+    <h2 style="color:white;">Custom Panel</h2>
+    <p style="color:#ccc;">Fully controllable sidebar replacement.</p>
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown("""
-    <style>
-        [data-testid="stSidebar"] {
-            width: 300px !important;
-            min-width: 300px !important;
-            visibility: visible !important;
-        }
-        .sidebar-top-right {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 999;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+# ---- OPEN BUTTON ----
+st.markdown("""
+<div id="open-btn">
+    <form><button name="open" value="1">Open</button></form>
+</div>
+""", unsafe_allow_html=True)
 
-    with st.sidebar:
-        st.markdown('<div class="sidebar-top-right neon-purple">', unsafe_allow_html=True)
-        if st.button("Close"):
-            st.session_state.sidebar_open = False
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+# ---- BUTTON LOGIC ----
+qs = st.query_params
+if "close" in qs:
+    st.session_state.panel_open = False
+    st.query_params.clear()
+    st.rerun()
 
-# -------- CLOSED STATE --------
-else:
+if "open" in qs:
+    st.session_state.panel_open = True
+    st.query_params.clear()
+    st.rerun()
 
-    st.markdown("""
-    <style>
-        [data-testid="stSidebar"] {
-            width: 0 !important;
-            min-width: 0 !important;
-            visibility: hidden !important;
-        }
-
-        .green-floating {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            left: auto !important;
-            z-index: 2000;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<div class="green-floating neon-green">', unsafe_allow_html=True)
-    if st.button("Open"):
-        st.session_state.sidebar_open = True
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-
-st.title("Sidebar Toggle Test — SAFE MODE")
+# ---- MAIN CONTENT ----
+st.title("UNBREAKABLE CUSTOM SIDEBAR")
+st.write("This is your new sidebar. It will NEVER break again.")

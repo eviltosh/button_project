@@ -1,1 +1,1 @@
-streamlit run base,py 
+streamlit run app_core,py 

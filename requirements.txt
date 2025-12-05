@@ -1,0 +1,3 @@
+streamlit
+streamlit-custom-sidebar
+streamlit-float

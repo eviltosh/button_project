@@ -1,131 +1,99 @@
 import streamlit as st
 
-# --------------------------
-# INIT SESSION STATE
-# --------------------------
+# -----------------------------------------------------
+#  PAGE CONFIG
+# -----------------------------------------------------
+st.set_page_config(page_title="Button Project", layout="wide")
+
+# -----------------------------------------------------
+#  INITIAL STATE
+# -----------------------------------------------------
 if "sidebar_open" not in st.session_state:
     st.session_state.sidebar_open = True
 
-
-# --------------------------
-# TOGGLE FUNCTIONS
-# --------------------------
-def close_sidebar():
-    st.session_state.sidebar_open = False
-
-
-def open_sidebar():
-    st.session_state.sidebar_open = True
-
-
-# --------------------------
-# PAGE CONFIG
-# --------------------------
-st.set_page_config(page_title="Button Project", layout="wide")
-
-
-# --------------------------
-# GLOBAL CSS (background + neon buttons + hide chevrons)
-# --------------------------
-st.markdown("""
+# -----------------------------------------------------
+#  BACKGROUND IMAGE CSS FOR SIDEBAR
+# -----------------------------------------------------
+SIDEBAR_BG = """
 <style>
-
-    /* FORCE SIDEBAR IMAGE FULL COVER */
+    /* Sidebar background */
     [data-testid="stSidebar"] {
         background-image: url("https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png");
         background-size: cover !important;
-        background-position: center !important;
         background-repeat: no-repeat !important;
-        padding: 0 !important;
-        margin: 0 !important;
+        background-position: center !important;
     }
 
-    /* Remove inner containers blocking the image */
-    [data-testid="stSidebar"] > div {
-        background: transparent !important;
-        padding: 0 !important;
-    }
-    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        background: transparent !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    /* REMOVE STREAMLIT CHEVRONS */
-    button[kind="header"] {
-        display: none !important;
-    }
-
-    /* PURPLE NEON CLOSE BUTTON (inside sidebar) */
-    .purple-btn {
-        background-color: #8a2be2 !important;
+    /* NEON PURPLE CLOSE BUTTON */
+    .neon-close {
+        background: #b026ff !important;
         color: white !important;
-        border-radius: 10px !important;
-        padding: 10px 25px !important;
-        border: 2px solid #c084fc !important;
-        box-shadow: 0 0 12px #c084fc !important;
-        font-weight: bold !important;
-        margin-top: 20px;
+        border-radius: 8px !important;
+        padding: 10px 26px !important;
+        border: 2px solid #ff7bff !important;
+        box-shadow: 0 0 12px #d17dff, 0 0 20px #b026ff;
+        font-weight: 700 !important;
+        margin-top: 12px;
+        margin-left: 12px;
     }
 
-    /* GREEN NEON OPEN BUTTON (floating top right) */
-    .green-btn {
-        position: fixed;
-        top: 20px;
-        right: 30px;
-        z-index: 99999 !important;
-        background-color: #22c55e !important;
+    /* NEON GREEN OPEN BUTTON */
+    .neon-open {
+        background: #00ff88 !important;
         color: black !important;
-        border-radius: 10px !important;
-        padding: 10px 25px !important;
-        border: 2px solid #86efac !important;
-        box-shadow: 0 0 12px #86efac !important;
-        font-weight: bold !important;
+        border-radius: 8px !important;
+        padding: 10px 26px !important;
+        border: 2px solid #7affc0 !important;
+        box-shadow: 0 0 12px #00ff88, 0 0 20px #00cc66;
+        font-weight: 700 !important;
+        margin-top: 12px;
+        margin-left: 12px;
     }
-
 </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(SIDEBAR_BG, unsafe_allow_html=True)
 
+# -----------------------------------------------------
+#  SIDEBAR TOGGLE LOGIC
+# -----------------------------------------------------
+def open_sidebar():
+    st.session_state.sidebar_open = True
 
-# --------------------------
-# RENDER OPEN BUTTON (only when sidebar closed)
-# --------------------------
-if not st.session_state.sidebar_open:
-    if st.button("Open Sidebar", key="open_btn", help="Open menu",
-                 use_container_width=False):
-        open_sidebar()
+def close_sidebar():
+    st.session_state.sidebar_open = False
 
-    # Apply green CSS
-    st.markdown("""
-        <script>
-            document.querySelector('button[data-testid="open_btn"]').classList.add('green-btn');
-        </script>
-    """, unsafe_allow_html=True)
-
-
-# --------------------------
-# SIDEBAR CONTENT
-# --------------------------
+# -----------------------------------------------------
+#  RENDER SIDEBAR (only when open)
+# -----------------------------------------------------
 if st.session_state.sidebar_open:
     with st.sidebar:
-        st.write("")  # spacer
+        st.markdown("### ")  # spacer
 
-        # Purple CLOSE button
-        if st.button("Close Sidebar", key="close_btn", help="Hide menu"):
+        st.markdown(
+            '<button class="neon-close" onclick="window.location.reload()">CLOSE</button>',
+            unsafe_allow_html=True
+        )
+
+        # Real Streamlit close button (hidden)
+        if st.button("hidden_close", key="hidden_close_button"):
             close_sidebar()
 
-        # Apply purple CSS
-        st.markdown("""
-            <script>
-                document.querySelector('button[data-testid="close_btn"]').classList.add('purple-btn');
-            </script>
-        """, unsafe_allow_html=True)
+# -----------------------------------------------------
+#  RENDER OPEN BUTTON WHEN SIDEBAR COLLAPSED
+# -----------------------------------------------------
+if not st.session_state.sidebar_open:
+    st.markdown(
+        '<button class="neon-open" onclick="window.location.reload()">OPEN SIDEBAR</button>',
+        unsafe_allow_html=True
+    )
 
+    if st.button("hidden_open", key="hidden_open_button"):
+        open_sidebar()
 
-# --------------------------
-# MAIN APP
-# --------------------------
+# -----------------------------------------------------
+#  MAIN CONTENT
+# -----------------------------------------------------
 st.title("Main App")
 st.write("This version uses **pure Streamlit** and will not break on Cloud.")
 
-st.write(f"Sidebar state: `{st.session_state.sidebar_open}`")
+st.write("Sidebar state:", st.session_state.sidebar_open)

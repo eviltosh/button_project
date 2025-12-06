@@ -3,38 +3,40 @@ import streamlit as st
 st.set_page_config(layout="wide")
 
 # ----------------------------------------------------
-# Correct CSS: Targets buttons *by their label text*
+# CSS THAT WORKS ON STREAMLIT CLOUD
 # ----------------------------------------------------
 st.markdown("""
 <style>
 
 /* PURPLE CLOSE BUTTON */
-div.stButton > button:contains("CLOSE") {
+span.close-label {
+    display: inline-block;
     background: #b300ff !important;
     color: white !important;
+    padding: 8px 18px !important;
     border-radius: 8px !important;
-    padding: 10px 20px !important;
-    border: none !important;
     box-shadow: 0 0 12px #b300ff !important;
     font-size: 16px !important;
+    font-weight: 600;
 }
 
 /* GREEN OPEN BUTTON */
-div.stButton > button:contains("OPEN") {
+span.open-label {
+    display: inline-block;
     background: #00ff66 !important;
     color: black !important;
+    padding: 8px 18px !important;
     border-radius: 8px !important;
-    padding: 10px 20px !important;
-    border: none !important;
     box-shadow: 0 0 12px #00ff66 !important;
     font-size: 16px !important;
+    font-weight: 600;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # ----------------------------------------------------
-# Sidebar state logic — unchanged
+# Sidebar state logic (unchanged)
 # ----------------------------------------------------
 if "sidebar_open" not in st.session_state:
     st.session_state.sidebar_open = True
@@ -61,16 +63,29 @@ if st.session_state.sidebar_open:
     """, unsafe_allow_html=True)
 
     with st.sidebar:
-        st.button("CLOSE", key="close-btn", on_click=close_sidebar)
+        # BUTTON LABEL WITH CUSTOM HTML SPAN
+        st.button(
+            "✖ <span class='close-label'>CLOSE</span>",
+            key="close-btn",
+            on_click=close_sidebar,
+            help="close sidebar",
+            use_container_width=True
+        )
 
 # ----------------------------------------------------
 # Sidebar CLOSED
 # ----------------------------------------------------
 else:
-    st.button("OPEN", key="open-btn", on_click=open_sidebar)
+    st.button(
+        "▶ <span class='open-label'>OPEN</span>",
+        key="open-btn",
+        on_click=open_sidebar,
+        help="open sidebar",
+        use_container_width=True,
+    )
 
 # ----------------------------------------------------
-# Main content (unchanged)
+# Main content
 # ----------------------------------------------------
-st.title("Main App – No-JS Toggle System")
+st.title("Main App – No JS Toggle System")
 st.write("Sidebar open:", st.session_state.sidebar_open)

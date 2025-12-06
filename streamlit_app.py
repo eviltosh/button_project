@@ -4,16 +4,38 @@ st.set_page_config(layout="wide")
 
 RAW_URL = "https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png"
 
-# --- APPLY SIDEBAR BACKGROUND ---
-sidebar_css = f"""
+# Session state toggle
+if "sidebar_open" not in st.session_state:
+    st.session_state.sidebar_open = True
+
+# Toggle functions
+def close_sidebar():
+    st.session_state.sidebar_open = False
+
+def open_sidebar():
+    st.session_state.sidebar_open = True
+
+# --- APPLY CSS ---
+sidebar_width = "300px" if st.session_state.sidebar_open else "0px"
+
+css = f"""
 <style>
+/* Sidebar background */
+[data-testid="stSidebar"] {{
+    width: {sidebar_width} !important;
+    min-width: {sidebar_width} !important;
+    max-width: {sidebar_width} !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease-in-out;
+}}
 [data-testid="stSidebar"] > div:first-child {{
     background-image: url('{RAW_URL}');
     background-size: cover;
     background-position: center;
 }}
 
-.sidebar-button {{
+/* CLOSE BUTTON (inside sidebar) */
+.sidebar-close-btn {{
     position: absolute;
     top: 12px;
     right: 12px;
@@ -25,34 +47,37 @@ sidebar_css = f"""
     color: white;
     cursor: pointer;
 }}
+
+/* OPEN BUTTON (main screen) */
+.open-btn {{
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    padding: 10px 16px;
+    background: #33ff33;
+    border-radius: 10px;
+    border: 2px solid #bbffbb;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 9999;
+    display: { "none" if st.session_state.sidebar_open else "block" };
+}}
 </style>
 """
 
-st.markdown(sidebar_css, unsafe_allow_html=True)
+st.markdown(css, unsafe_allow_html=True)
 
 # --- SIDEBAR CONTENT ---
-with st.sidebar:
-    st.markdown(f"<div class='sidebar-button'>CLOSE</div>", unsafe_allow_html=True)
+if st.session_state.sidebar_open:
+    with st.sidebar:
+        if st.button("CLOSE", key="close_btn"):
+            close_sidebar()
 
-# --- MAIN SCREEN BUTTON ---
-st.markdown(
-    """
-    <style>
-    .main-open {
-        position: fixed;
-        top: 12px;
-        right: 12px;
-        padding: 10px 16px;
-        background: #38ff38;
-        border: 2px solid #aaffaa;
-        border-radius: 10px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-    </style>
-    <div class="main-open">OPEN SIDEBAR</div>
-    """,
-    unsafe_allow_html=True
-)
+# --- OPEN BUTTON ---
+if not st.session_state.sidebar_open:
+    if st.button("OPEN SIDEBAR", key="open_btn"):
+        open_sidebar()
 
+# --- MAIN CONTENT ---
 st.title("Main App")
+

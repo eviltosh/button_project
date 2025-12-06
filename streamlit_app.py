@@ -6,7 +6,6 @@ st.set_page_config(layout="wide")
 if "sidebar_open" not in st.session_state:
     st.session_state.sidebar_open = True
 
-
 # ---- CSS ----
 st.markdown("""
 <style>
@@ -51,7 +50,6 @@ st.markdown("""
 
 
 # ---- LOGIC ----
-
 def close_sidebar():
     st.session_state.sidebar_open = False
 
@@ -66,4 +64,13 @@ if st.session_state.sidebar_open:
             '<button class="neon-close" onclick="document.getElementById(\'close_button\').click()">CLOSE</button>',
             unsafe_allow_html=True
         )
-        st.button("hidden close", key="close_bu_
+        st.button("hidden close", key="close_button", on_click=close_sidebar)
+
+
+# ---- OPEN BUTTON (OUTSIDE SIDEBAR) ----
+if not st.session_state.sidebar_open:
+    st.markdown(
+        '<button class="neon-open" onclick="document.getElementById(\'open_button\').click()">OPEN SIDEBAR</button>',
+        unsafe_allow_html=True
+    )
+    st.button("hidden open", key="open_button", on_

@@ -64,7 +64,6 @@ img_html = f"""
       };
       fetchInfo.innerText = JSON.stringify(info, null, 2);
       if (!res.ok) {
-          // try reading text for more clues (may be HTML 404 page)
           try {
               const txt = await res.text();
               fetchInfo.innerText += "\\n\\n=== response text (first 500 chars) ===\\n" + txt.slice(0,500);
@@ -75,7 +74,6 @@ img_html = f"""
     }
   })();
 
-  // Quick check if CSS background image applied by measuring computed style
   setTimeout(function(){
     const bgPreview = document.getElementById('bgPreview');
     const cs = window.getComputedStyle(bgPreview);

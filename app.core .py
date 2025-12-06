@@ -2,39 +2,40 @@ import streamlit as st
 
 st.set_page_config(layout="wide")
 
-# -------------------------------------
-# CSS to make Streamlit buttons neon
-# -------------------------------------
+# ----------------------------------------------------
+# Correct CSS: Targets buttons *by their label text*
+# ----------------------------------------------------
 st.markdown("""
 <style>
-/* Purple Close */
-button[data-testid="close-btn"] {
+
+/* PURPLE CLOSE BUTTON */
+div.stButton > button:contains("CLOSE") {
     background: #b300ff !important;
     color: white !important;
     border-radius: 8px !important;
-    padding: 12px 22px !important;
+    padding: 10px 20px !important;
     border: none !important;
-    width: 100% !important;
     box-shadow: 0 0 12px #b300ff !important;
-    font-size: 18px !important;
+    font-size: 16px !important;
 }
 
-/* Green Open */
-button[data-testid="open-btn"] {
+/* GREEN OPEN BUTTON */
+div.stButton > button:contains("OPEN") {
     background: #00ff66 !important;
     color: black !important;
     border-radius: 8px !important;
-    padding: 12px 22px !important;
+    padding: 10px 20px !important;
     border: none !important;
     box-shadow: 0 0 12px #00ff66 !important;
-    font-size: 18px !important;
+    font-size: 16px !important;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------------------
-# Sidebar state
-# -------------------------------------
+# ----------------------------------------------------
+# Sidebar state logic — unchanged
+# ----------------------------------------------------
 if "sidebar_open" not in st.session_state:
     st.session_state.sidebar_open = True
 
@@ -44,9 +45,9 @@ def close_sidebar():
 def open_sidebar():
     st.session_state.sidebar_open = True
 
-# -------------------------------------
-# Sidebar when OPEN
-# -------------------------------------
+# ----------------------------------------------------
+# Sidebar OPEN
+# ----------------------------------------------------
 if st.session_state.sidebar_open:
 
     st.markdown("""
@@ -60,16 +61,16 @@ if st.session_state.sidebar_open:
     """, unsafe_allow_html=True)
 
     with st.sidebar:
-        st.button("CLOSE", key="close-btn", help="", on_click=close_sidebar)
+        st.button("CLOSE", key="close-btn", on_click=close_sidebar)
 
-# -------------------------------------
-# When sidebar is CLOSED
-# -------------------------------------
+# ----------------------------------------------------
+# Sidebar CLOSED
+# ----------------------------------------------------
 else:
-    st.button("OPEN SIDEBAR", key="open-btn", on_click=open_sidebar)
+    st.button("OPEN", key="open-btn", on_click=open_sidebar)
 
-# -------------------------------------
-# Main content
-# -------------------------------------
+# ----------------------------------------------------
+# Main content (unchanged)
+# ----------------------------------------------------
 st.title("Main App – No-JS Toggle System")
 st.write("Sidebar open:", st.session_state.sidebar_open)

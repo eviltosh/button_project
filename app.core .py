@@ -1,46 +1,27 @@
 import streamlit as st
 
-# -----------------------------
-# PAGE CONFIG
-# -----------------------------
 st.set_page_config(layout="wide")
 
 # -----------------------------
-# SESSION STATE
+# Read URL params
 # -----------------------------
+params = st.query_params
+if "close" in params:
+    st.session_state.sidebar_open = False
+if "open" in params:
+    st.session_state.sidebar_open = True
+
+# Init default
 if "sidebar_open" not in st.session_state:
     st.session_state.sidebar_open = True
 
 
 # -----------------------------
-# CALLBACKS
-# -----------------------------
-def close_sidebar():
-    st.session_state.sidebar_open = False
-
-def open_sidebar():
-    st.session_state.sidebar_open = True
-
-
-# =====================================================
-# STABLE HTML-ID WRAPPERS FOR HIDDEN BUTTONS
-# =====================================================
-# We wrap the Streamlit button inside a <div id="...">
-# so JS can reliably click it from your neon HTML buttons.
-# =====================================================
-
-def stable_hidden_button(id_html: str, label: str, key: str, callback):
-    st.markdown(f'<div id="{id_html}">', unsafe_allow_html=True)
-    st.button(label, key=key, on_click=callback)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-# -----------------------------
-# SIDEBAR CONTENT (when open)
+# Sidebar OPEN
 # -----------------------------
 if st.session_state.sidebar_open:
 
-    # Full sidebar background image
+    # Full background
     st.markdown("""
         <style>
         section[data-testid="stSidebar"] {
@@ -51,43 +32,35 @@ if st.session_state.sidebar_open:
         </style>
     """, unsafe_allow_html=True)
 
-    # -----------------------------
-    # PURPLE CLOSE BUTTON (VISIBLE)
-    # -----------------------------
-    st.sidebar.markdown("""
-        <button 
-            onclick="document.querySelector('#hidden_close button').click();"
-            style="
+    # PURPLE CLOSE BUTTON (works 100%)
+    st.sidebar.markdown(
+        """
+        <a href="?close=1">
+            <button style="
                 background:#b300ff;
                 color:white;
                 padding:10px 20px;
                 border:none;
                 border-radius:6px;
                 font-size:16px;
-                margin-bottom:20px;
                 cursor:pointer;
+                width:100%;
+                margin-bottom:20px;
             ">
-            CLOSE
-        </button>
-    """, unsafe_allow_html=True)
-
-    # Hidden button with stable ID
-    with st.sidebar:
-        stable_hidden_button(
-            id_html="hidden_close",
-            label="hidden_close",
-            key="hidden_close_key",
-            callback=close_sidebar
-        )
+                CLOSE
+            </button>
+        </a>
+        """,
+        unsafe_allow_html=True
+    )
 
 else:
-    # -----------------------------
-    # GREEN OPEN BUTTON (VISIBLE)
-    # -----------------------------
-    st.markdown("""
-        <button 
-            onclick="document.querySelector('#hidden_open button').click();"
-            style="
+
+    # GREEN OPEN BUTTON (works 100%)
+    st.markdown(
+        """
+        <a href="?open=1">
+            <button style="
                 background:#00ff66;
                 color:black;
                 padding:10px 20px;
@@ -95,24 +68,19 @@ else:
                 border-radius:6px;
                 font-size:16px;
                 cursor:pointer;
+                font-size:16px;
             ">
-            Open Sidebar
-        </button>
-    """, unsafe_allow_html=True)
-
-    # Hidden button with stable ID
-    stable_hidden_button(
-        id_html="hidden_open",
-        label="hidden_open",
-        key="hidden_open_key",
-        callback=open_sidebar
+                OPEN SIDEBAR
+            </button>
+        </a>
+        """,
+        unsafe_allow_html=True
     )
 
 
 # -----------------------------
-# MAIN PAGE CONTENT
+# MAIN APP
 # -----------------------------
-st.title("Main App")
-st.write("Sidebar toggle uses **stable Streamlit session state**.")
-st.write("Purple CLOSE = one click. Green OPEN = one click.")
-st.write("DEBUG: sidebar_open =", st.session_state.sidebar_open)
+st.title("Main App – QueryParam Toggle System (Bulletproof)")
+st.write("Sidebar:", st.session_state.sidebar_open)
+

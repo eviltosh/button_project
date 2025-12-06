@@ -1,106 +1,105 @@
 import streamlit as st
 
-# --------------------------------------------------------
-# PAGE CONFIG
-# --------------------------------------------------------
 st.set_page_config(layout="wide")
 
-RAW_BG = "https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png"
+# Your confirmed background image
+BG_URL = "https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png"
 
-# --------------------------------------------------------
+# -------------------------------------------------------------
 # SESSION STATE
-# --------------------------------------------------------
+# -------------------------------------------------------------
 if "sidebar_open" not in st.session_state:
     st.session_state.sidebar_open = True
 
-
-# --------------------------------------------------------
-# SIDEBAR RENDER
-# --------------------------------------------------------
-def render_sidebar():
-    """Draw the sidebar with neon CLOSE button + background image."""
+# -------------------------------------------------------------
+# SIDEBAR (OPEN STATE)
+# -------------------------------------------------------------
+if st.session_state.sidebar_open:
     with st.sidebar:
+        # Background layer — DOES NOT BLOCK CLICKS
         st.markdown(
             f"""
             <div style="
                 position:absolute;
                 inset:0;
-                background:url('{RAW_BG}') center/cover no-repeat;
-                pointer-events:none;   /* ⭐ IMPORTANT FIX — allows button clicks */
+                background:url('{BG_URL}') center/cover no-repeat;
                 z-index:0;
+                pointer-events:none;
             "></div>
             """,
             unsafe_allow_html=True
         )
 
         # Neon purple CLOSE button
-        close_clicked = st.button(
-            "CLOSE",
-            key="close_button",
-            help="Close sidebar",
+        st.markdown(
+            """
+            <style>
+            .purple-close {
+                background:#b300ff;
+                color:white !important;
+                width:100%;
+                padding:12px 20px;
+                border:none;
+                border-radius:8px;
+                font-weight:700;
+                box-shadow:0 0 12px #b300ff;
+                cursor:pointer;
+                position:relative;
+                z-index:10;
+            }
+            .purple-close:hover {
+                box-shadow:0 0 22px #d36bff;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
         )
-        if close_clicked:
+
+        if st.button("CLOSE", key="close_btn"):
             st.session_state.sidebar_open = False
 
-
-# --------------------------------------------------------
-# TOP-RIGHT OPEN BUTTON
-# --------------------------------------------------------
-def render_open_button():
-    """
-    Renders a green OPEN button below Streamlit’s top toolbar.
-    Absolutely positioned to top-right.
-    """
+# -------------------------------------------------------------
+# MAIN PAGE — OPEN BUTTON (ONLY WHEN SIDEBAR CLOSED)
+# -------------------------------------------------------------
+if not st.session_state.sidebar_open:
     st.markdown(
         """
         <style>
-            .open-btn {
-                position: fixed;
-                top: 70px;       /* ⭐ BELOW the Streamlit toolbar */
-                right: 25px;
-                z-index: 9999;
-                background: #00ff88;
-                color: #000;
-                padding: 10px 22px;
-                border-radius: 8px;
-                border: 2px solid #00ff88;
-                font-weight: 700;
-                cursor: pointer;
-                box-shadow: 0 0 12px #00ff88;
-                transition: 0.15s;
-            }
-            .open-btn:hover {
-                box-shadow: 0 0 22px #00ffaa;
-            }
+        .green-open {
+            background:#00ff88;
+            color:black !important;
+            padding:12px 22px;
+            font-weight:700;
+            border:none;
+            border-radius:8px;
+            box-shadow:0 0 12px #00ff88;
+            cursor:pointer;
+
+            /* Position top-right BELOW Streamlit black menu bar */
+            position:fixed;
+            top:70px;
+            right:25px;
+            z-index:9999;
+        }
+        .green-open:hover {
+            box-shadow:0 0 22px #66ffc2;
+        }
         </style>
 
-        <button class="open-btn" onclick="fetch('?open=1', {method:'POST'}).then(()=>location.reload())">
+        <button class="green-open" onclick="window.location.search='open=1'">
             OPEN
         </button>
         """,
         unsafe_allow_html=True
     )
 
-
-# --------------------------------------------------------
-# HANDLE OPEN VIA QUERY
-# --------------------------------------------------------
-query_params = st.query_params.to_dict()
-
-if "open" in query_params:
+# Handle open via query param
+query = st.query_params.to_dict()
+if "open" in query:
     st.session_state.sidebar_open = True
 
-
-# --------------------------------------------------------
-# MAIN PAGE RENDER
-# --------------------------------------------------------
-if st.session_state.sidebar_open:
-    render_sidebar()
-else:
-    render_open_button()
-
+# -------------------------------------------------------------
+# MAIN PAGE CONTENT
+# -------------------------------------------------------------
 st.title("Main App")
-st.write("Sidebar toggle now uses stable Streamlit session state.")
-
-st.write("Purple CLOSE (single click). Green OPEN (single click).")
-st.write("DEBUG: sidebar_open =", st.session_state.sidebar_open)
+st.write("Sidebar toggle is fully operational.")

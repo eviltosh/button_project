@@ -1,97 +1,161 @@
-# DIAGNOSTIC base.py — paste/overwrite and run on Streamlit Cloud
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(layout="wide")
+st.set_page_config(page_title="Neon Custom Sidebar (Fixed)", layout="wide")
 
-RAW_URL = "https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png"
+# ----------------------------------------------------------------
+# Self-contained HTML/CSS/JS for the custom sidebar + buttons
+# ----------------------------------------------------------------
+html = """
+<style>
+:root{
+  --sidebar-width: 320px;
+  --bg-dark: #0b0b0f;
+}
 
-st.title("DEBUG: Sidebar background image diagnostic (run once)")
+/* OPEN BUTTON (green) top-left */
+#neon-open-btn {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 999999;
+  background: linear-gradient(90deg,#00ff9f,#00d67a);
+  color: #001100;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0,255,159,0.15), 0 0 36px rgba(0,214,122,0.08);
+  transition: transform 120ms ease;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+#neon-open-btn:active { transform: translateY(1px) scale(.995); }
+#neon-open-btn.hidden { display: none; }
 
-st.markdown("**Instructions:** Reload the page, wait ~3s for tests to finish. Copy the text results below and paste them back here (or screenshot).")
+/* SIDEBAR container */
+#customSidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--sidebar-width);
+  max-width: 90vw;
+  background: linear-gradient(180deg,#23232a, #17171b);
+  box-shadow: 8px 0 30px rgba(0,0,0,0.6);
+  transform: translateX(-110%);
+  transition: transform 300ms cubic-bezier(.2,.9,.2,1);
+  z-index: 999998;
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  color: #e8e8ee;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
 
-# 1) Show the URL we're testing
-st.write("Testing image URL:", RAW_URL)
+/* When open */
+#customSidebar.open {
+  transform: translateX(0);
+}
 
-# 2) Show an <img> tag (simple browser-level test)
-img_html = f"""
-<div style="display:flex;gap:18px;align-items:flex-start;">
-  <div>
-    <div style="font-weight:700;margin-bottom:6px;">Direct &lt;img&gt; test</div>
-    <img id="testImg" src="{RAW_URL}" style="max-width:320px; border: 2px solid #222; box-shadow: 0 6px 18px rgba(0,0,0,0.4);" />
-    <div id="imgInfo" style="margin-top:8px;color:#ddd;font-family:monospace;"></div>
+/* Header row inside sidebar */
+#cs-header {
+  position: relative;
+  min-height: 44px;
+  margin-bottom: 8px;
+}
+
+/* Purple neon close button */
+#purple-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #9b4dff;
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 800;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(160,32,240,0.85), 0 0 22px rgba(180,120,255,0.45);
+  pointer-events: auto;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+#purple-close:hover { transform: scale(1.03); }
+#purple-close:active { transform: scale(.98); }
+
+#cs-content {
+  padding-top: 8px;
+  overflow-y: auto;
+}
+
+/* Allow interaction */
+#customSidebar, #customSidebar * { pointer-events: auto; }
+
+/* Hide Streamlit's built-in sidebar */
+section[data-testid="stSidebar"]{ display:none !important; }
+
+@media (max-width: 520px) {
+  :root { --sidebar-width: 86vw; }
+  #neon-open-btn { left: 12px; top: 12px; padding: 10px 14px; }
+}
+</style>
+
+<div id="customSidebar" aria-hidden="true">
+  <div id="cs-header">
+    <button id="purple-close" aria-label="Close sidebar">✖ Close</button>
   </div>
 
-  <div>
-    <div style="font-weight:700;margin-bottom:6px;">CSS background test (sidebar preview)</div>
-    <div id="bgPreview" style="width:320px;height:240px;border:2px solid #222;background:url('{RAW_URL}') center/cover no-repeat;"></div>
-    <div id="bgInfo" style="margin-top:8px;color:#ddd;font-family:monospace;"></div>
-  </div>
-
-  <div style="min-width:300px;">
-    <div style="font-weight:700;margin-bottom:6px;">Fetch/CORS test (JavaScript)</div>
-    <pre id="fetchInfo" style="background:#071018;color:#9fe9c7;padding:10px;border-radius:6px;min-height:120px;overflow:auto;font-family:monospace;"></pre>
+  <div id="cs-content">
+    <!-- Your sidebar content goes here -->
   </div>
 </div>
 
+<button id="neon-open-btn" aria-label="Open sidebar">OPEN SIDEBAR</button>
+
 <script>
 (function(){
-  const testImg = document.getElementById('testImg');
-  const imgInfo = document.getElementById('imgInfo');
-  const fetchInfo = document.getElementById('fetchInfo');
-  const bgInfo = document.getElementById('bgInfo');
+  const openBtn = document.getElementById('neon-open-btn');
+  const sidebar = document.getElementById('customSidebar');
+  const closeBtn = document.getElementById('purple-close');
 
-  // img load / error handlers
-  testImg.onload = function(){
-    imgInfo.innerText = 'IMG LOAD OK — naturalW x naturalH = ' + this.naturalWidth + ' x ' + this.naturalHeight;
-  };
-  testImg.onerror = function(ev){
-    imgInfo.innerText = 'IMG LOAD ERROR — network or 404 or CORS blocking the resource';
-  };
+  function openSidebar() {
+    sidebar.classList.add('open');
+    sidebar.setAttribute('aria-hidden', 'false');
+    openBtn.classList.add('hidden');
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    sidebar.setAttribute('aria-hidden', 'true');
+    setTimeout(()=> openBtn.classList.remove('hidden'), 260);
+  }
 
-  // Fetch test to inspect status & headers
-  (async function(){
-    try {
-      const res = await fetch("{RAW_URL}", { method: 'GET', mode: 'cors', cache: 'no-store' });
-      const headers = {};
-      for (const pair of res.headers.entries()) headers[pair[0]] = pair[1];
-      const info = {
-        ok: res.ok,
-        status: res.status,
-        statusText: res.statusText,
-        url: res.url,
-        headers: headers
-      };
-      fetchInfo.innerText = JSON.stringify(info, null, 2);
-      if (!res.ok) {
-          // try reading text for more clues (may be HTML 404 page)
-          try {
-              const txt = await res.text();
-              fetchInfo.innerText += "\\n\\n=== response text (first 500 chars) ===\\n" + txt.slice(0,500);
-          } catch(e){}
-      }
-    } catch (err) {
-      fetchInfo.innerText = "FETCH ERROR — likely CORS or network blocked:\\n" + err.toString();
+  openBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    openSidebar();
+  });
+
+  closeBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    closeSidebar();
+  });
+
+  document.addEventListener('click', function(e){
+    const outside = !sidebar.contains(e.target) && !openBtn.contains(e.target);
+    if (outside && sidebar.classList.contains('open')) {
+      closeSidebar();
     }
-  })();
+  }, true);
 
-  // Quick check if CSS background image applied by measuring computed style
-  setTimeout(function(){
-    const bgPreview = document.getElementById('bgPreview');
-    const cs = window.getComputedStyle(bgPreview);
-    const bg = cs.backgroundImage || cs.background;
-    bgInfo.innerText = 'Computed background-image: ' + (bg || '(none)');
-  }, 800);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+      closeSidebar();
+    }
+  });
+
 })();
 </script>
 """
 
-components.html(img_html, height=380, scrolling=True)
-
-st.markdown("---")
-st.write("After the tests finish, paste the **three** results from the page here (or screenshot):")
-st.write("- The `IMG LOAD` line under the image") 
-st.write("- The `Fetch/CORS test` JSON output (or error text)") 
-st.write("- The `Computed background-image` line under the preview")
-
-st.write("If the fetch status shows `status: 200` and the image still doesn’t appear as the sidebar background, paste the fetch JSON and I will produce the final working fallback.")
+components.html(html, height=800, scrolling=False)

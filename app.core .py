@@ -8,7 +8,7 @@ st.set_page_config(layout="wide")
 params = st.query_params
 if "close" in params:
     st.session_state.sidebar_open = False
-if "open" in params:
+elif "open" in params:
     st.session_state.sidebar_open = True
 
 # Init default
@@ -21,7 +21,7 @@ if "sidebar_open" not in st.session_state:
 # -----------------------------
 if st.session_state.sidebar_open:
 
-    # Full background
+    # Full sidebar background image
     st.markdown("""
         <style>
         section[data-testid="stSidebar"] {
@@ -32,11 +32,11 @@ if st.session_state.sidebar_open:
         </style>
     """, unsafe_allow_html=True)
 
-    # PURPLE CLOSE BUTTON (works 100%)
+    # PURPLE CLOSE BUTTON — stays on same page
     st.sidebar.markdown(
         """
-        <a href="?close=1">
-            <button style="
+        <button onclick="window.location.search='?close=1'"
+            style="
                 background:#b300ff;
                 color:white;
                 padding:10px 20px;
@@ -47,20 +47,18 @@ if st.session_state.sidebar_open:
                 width:100%;
                 margin-bottom:20px;
             ">
-                CLOSE
-            </button>
-        </a>
+            CLOSE
+        </button>
         """,
         unsafe_allow_html=True
     )
 
 else:
-
-    # GREEN OPEN BUTTON (works 100%)
+    # GREEN OPEN BUTTON — stays on same page
     st.markdown(
         """
-        <a href="?open=1">
-            <button style="
+        <button onclick="window.location.search='?open=1'"
+            style="
                 background:#00ff66;
                 color:black;
                 padding:10px 20px;
@@ -68,11 +66,9 @@ else:
                 border-radius:6px;
                 font-size:16px;
                 cursor:pointer;
-                font-size:16px;
             ">
-                OPEN SIDEBAR
-            </button>
-        </a>
+            OPEN SIDEBAR
+        </button>
         """,
         unsafe_allow_html=True
     )
@@ -81,6 +77,5 @@ else:
 # -----------------------------
 # MAIN APP
 # -----------------------------
-st.title("Main App – QueryParam Toggle System (Bulletproof)")
+st.title("Main App – One-Page Toggle System")
 st.write("Sidebar:", st.session_state.sidebar_open)
-

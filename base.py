@@ -1,25 +1,20 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Neon Custom Sidebar", layout="wide")
+st.set_page_config(page_title="Neon Custom Sidebar (Fixed)", layout="wide")
 
-# Main content (Streamlit-managed)
-st.title("Neon Sidebar Control — Custom HTML Sidebar (Method A)")
-st.write("This app uses a fully custom HTML/CSS/JS sidebar injected into the page.")
-st.write("Green OPEN button sits at the top-left. Purple CLOSE button is top-right inside the sidebar.")
-st.write("Push Open / Close to see the sidebar slide in/out. The purple button retains the neon appearance you liked.")
+st.title("Neon Sidebar Control — Custom HTML Sidebar (Method A) — Fixed")
+st.write("This version forces the injected HTML iframe to a large height so Streamlit Cloud won't suppress it.")
+st.write("Green OPEN button sits top-left. Purple CLOSE is top-right inside the sidebar. One visible at a time.")
 
-# -----------------------
-# Inject custom sidebar HTML/CSS/JS
-# -----------------------
-# We use a single HTML blob. Keep triple quotes simple; no nested triple quotes inside.
+# ----------------------------------------------------------------
+# Self-contained HTML/CSS/JS for the custom sidebar + buttons
+# ----------------------------------------------------------------
 html = """
 <style>
-/* Root variables */
 :root{
   --sidebar-width: 320px;
   --bg-dark: #0b0b0f;
-  --panel-dark: #1f1f2a;
 }
 
 /* OPEN BUTTON (green) top-left */
@@ -43,7 +38,7 @@ html = """
 #neon-open-btn:active { transform: translateY(1px) scale(.995); }
 #neon-open-btn.hidden { display: none; }
 
-/* SIDEBAR container (fixed, overlays content) */
+/* SIDEBAR container */
 #customSidebar {
   position: fixed;
   top: 0;
@@ -63,7 +58,7 @@ html = """
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
 }
 
-/* When open: bring into view */
+/* When open */
 #customSidebar.open {
   transform: translateX(0);
 }
@@ -75,7 +70,7 @@ html = """
   margin-bottom: 8px;
 }
 
-/* Purple neon close button EXACT LOOK preserved */
+/* Purple neon close button (exact look preserved) */
 #purple-close {
   position: absolute;
   top: 0;
@@ -100,22 +95,22 @@ html = """
   overflow-y: auto;
 }
 
-/* Make sure clicks register: parent has pointer-events enabled */
+/* Important: allow pointer events in the injected sidebar */
 #customSidebar, #customSidebar * { pointer-events: auto; }
 
-/* Optional: hide the built-in Streamlit sidebar container if present (safe fallback) */
+/* Hide built-in Streamlit sidebar if present (safe fallback) */
 section[data-testid="stSidebar"]{ display:none !important; }
 
-/* small responsive tweak so sidebar doesn't cover tiny screens fully */
+/* Responsive tweak */
 @media (max-width: 520px) {
   :root { --sidebar-width: 86vw; }
   #neon-open-btn { left: 12px; top: 12px; padding: 10px 14px; }
 }
 </style>
 
+<!-- Sidebar DOM -->
 <div id="customSidebar" aria-hidden="true">
   <div id="cs-header">
-    <!-- Purple close button -->
     <button id="purple-close" aria-label="Close sidebar">✖ Close</button>
   </div>
 
@@ -123,7 +118,6 @@ section[data-testid="stSidebar"]{ display:none !important; }
     <h3 style="margin:6px 0 12px 0;">Sidebar Panel</h3>
     <p style="margin:0 0 10px 0;color:#cfcfe0;">Operational neon button online, Major Tom.</p>
 
-    <!-- sample controls -->
     <div style="margin-top:12px;">
       <label style="display:block;margin-bottom:6px;color:#bfc0d8;">Example control</label>
       <button style="
@@ -151,21 +145,17 @@ section[data-testid="stSidebar"]{ display:none !important; }
   const sidebar = document.getElementById('customSidebar');
   const closeBtn = document.getElementById('purple-close');
 
-  // open/close functions
   function openSidebar() {
     sidebar.classList.add('open');
     sidebar.setAttribute('aria-hidden', 'false');
-    // hide the open button while open
     openBtn.classList.add('hidden');
   }
   function closeSidebar() {
     sidebar.classList.remove('open');
     sidebar.setAttribute('aria-hidden', 'true');
-    // show the open button back after transition
     setTimeout(()=> openBtn.classList.remove('hidden'), 260);
   }
 
-  // Attach events
   openBtn.addEventListener('click', function(e){
     e.stopPropagation();
     openSidebar();
@@ -176,7 +166,7 @@ section[data-testid="stSidebar"]{ display:none !important; }
     closeSidebar();
   });
 
-  // optional: close sidebar when clicking outside it
+  // close when clicking outside
   document.addEventListener('click', function(e){
     const outside = !sidebar.contains(e.target) && !openBtn.contains(e.target);
     if (outside && sidebar.classList.contains('open')) {
@@ -184,25 +174,25 @@ section[data-testid="stSidebar"]{ display:none !important; }
     }
   }, true);
 
-  // Allow keyboard ESC to close
+  // ESC to close
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape' && sidebar.classList.contains('open')) {
       closeSidebar();
     }
   });
 
-  // Start with sidebar closed by default; if you want open, call openSidebar() here.
-  // openSidebar(); // uncomment if you want it open initially
+  // start closed (if you want open by default, call openSidebar())
 })();
 </script>
 """
 
-# Render injection. height must be >=1 to ensure execution.
-components.html(html, height=1)
+# ----------------------------------------------------------------
+# CRITICAL FIX: force a tall iframe so Streamlit Cloud shows the component
+# ----------------------------------------------------------------
+components.html(html, height=800, scrolling=False)
 
-# -----------------------
-# Streamlit content continues below.
-# You can leave the rest of your Streamlit UI here.
-# -----------------------
+# ----------------------------------------------------------------
+# Continue Streamlit-managed content below
+# ----------------------------------------------------------------
 st.write("Main app area — your Streamlit widgets go here below the injected custom sidebar.")
-st.write("When you're done with iterations, tell me which exact pixel tweaks you want and I'll execute them.")
+st.write("If anything still looks off visually, say ‘Failure’ and paste a screenshot — I will consult GH, SO and the USEReady blog (and others) FIRST, then patch immediately.")

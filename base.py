@@ -3,48 +3,50 @@ import streamlit.components.v1 as components
 
 st.set_page_config(initial_sidebar_state="expanded")
 
-# ---- CUSTOM JS TO CLOSE SIDEBAR ----
-close_js = """
+# --------------------------------------------------------------
+# JavaScript: Collapse the sidebar by simulating the built-in toggle button
+# --------------------------------------------------------------
+close_sidebar_js = """
 <script>
-    function closeSidebar() {
-        const sidebar = window.parent.document.querySelector("section[data-testid='stSidebar']");
-        if (sidebar) {
-            sidebar.style.display = 'none';
-        }
-    }
+function collapseSidebar() {
+    const toggle = window.parent.document.querySelector(
+        "button[title='Collapse sidebar']"
+    );
+    if (toggle) toggle.click();
+}
 </script>
 """
 
-# ---- DISPLAY JS ----
-components.html(close_js, height=0, width=0)
+components.html(close_sidebar_js, height=0)
 
-# ---- SIDEBAR ----
+# --------------------------------------------------------------
+# SIDEBAR CONTENT
+# --------------------------------------------------------------
 with st.sidebar:
     st.markdown(
         """
         <style>
-        .neon-close {
+        .neon-btn {
             position: absolute;
             top: 10px;
-            right: 12px;
-            background: #9b4dff;
-            padding: 8px 14px;
-            border-radius: 6px;
+            right: 10px;
+            background: #a020f0;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
             font-weight: 700;
             cursor: pointer;
-            color: white;
-            box-shadow: 0 0 12px #b06fff;
+            box-shadow: 0 0 10px #c060ff;
         }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
-    # Button that triggers JS
-    clicked = st.button("✕ Close", key="close_button")
+    if st.button("✕ Close", key="close_sb"):
+        components.html("<script>collapseSidebar()</script>", height=0)
 
-    if clicked:
-        components.html("<script>closeSidebar()</script>", height=0, width=0)
-
-# ---- MAIN PAGE ----
-st.write("Sidebar loaded. Close button is active, Major Tom.")
+# --------------------------------------------------------------
+# MAIN PAGE
+# --------------------------------------------------------------
+st.write("Close button deployed, Major Tom. Sidebar collapse function active.")

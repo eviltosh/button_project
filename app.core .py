@@ -1,72 +1,96 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide")
 
-# ----------------------------------------------------
-# CSS — works by targeting EACH button key using data-testid
-# ----------------------------------------------------
-st.markdown("""
-<style>
-
-button[kind="secondary"][data-testid="baseButton-close"] {
-    background: #b300ff !important;
-    color: white !important;
-    border-radius: 8px !important;
-    border: none !important;
-    box-shadow: 0 0 12px #b300ff !important;
-}
-
-button[kind="secondary"][data-testid="baseButton-open"] {
-    background: #00ff66 !important;
-    color: black !important;
-    border-radius: 8px !important;
-    border: none !important;
-    box-shadow: 0 0 12px #00ff66 !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# ----------------------------------------------------
-# Session state
-# ----------------------------------------------------
+# ------------------------------------------------------------------------------
+# STATE
+# ------------------------------------------------------------------------------
 if "sidebar_open" not in st.session_state:
     st.session_state.sidebar_open = True
 
-def close_sidebar():
-    st.session_state.sidebar_open = False
+# ------------------------------------------------------------------------------
+# HTML, CSS, JS
+# ------------------------------------------------------------------------------
 
-def open_sidebar():
+html_code = f"""
+<style>
+
+/* --- FIXED OPEN BUTTON (MAIN PAGE) --- */
+#open-btn {{
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 99999;
+    background: #00ff66;
+    color: black;
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: none;
+    font-size: 18px;
+    font-weight: 700;
+    box-shadow: 0 0 15px #00ff66;
+    cursor: pointer;
+    display: {'block' if not st.session_state.sidebar_open else 'none'};
+}}
+
+/* --- FIXED CLOSE BUTTON (INSIDE SIDEBAR AREA) --- */
+#close-btn {{
+    position: fixed;
+    top: 20px;
+    left: 270px; /* slightly inside sidebar */
+    z-index: 99999;
+    background: #b300ff;
+    color: white;
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: none;
+    font-size: 18px;
+    font-weight: 700;
+    box-shadow: 0 0 15px #b300ff;
+    cursor: pointer;
+    display: {'block' if st.session_state.sidebar_open else 'none'};
+}}
+
+/* --- SIDEBAR BACKGROUND --- */
+section[data-testid="stSidebar"] {{
+    background-image: url("https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png");
+    background-size: cover;
+    background-position: center;
+}}
+
+</style>
+
+<button id="open-btn" onclick="openSidebar()">OPEN</button>
+<button id="close-btn" onclick="closeSidebar()">CLOSE</button>
+
+<script>
+function openSidebar() {{
+    fetch('/open', {{method: 'POST'}}).then(() => window.parent.location.reload());
+}}
+function closeSidebar() {{
+    fetch('/close', {{method: 'POST'}}).then(() => window.parent.location.reload());
+}}
+</script>
+"""
+
+components.html(html_code, height=0)
+
+# ------------------------------------------------------------------------------
+# PYTHON ENDPOINTS FOR JS
+# ------------------------------------------------------------------------------
+@st.experimental_rpc("open", kind="http")
+def api_open():
     st.session_state.sidebar_open = True
+    return True
 
-# ----------------------------------------------------
-# Sidebar OPEN
-# ----------------------------------------------------
-if st.session_state.sidebar_open:
+@st.experimental_rpc("close", kind="http")
+def api_close():
+    st.session_state.sidebar_open = False
+    return True
 
-    # Sidebar background
-    st.markdown("""
-        <style>
-        section[data-testid="stSidebar"] {
-            background: url("https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png");
-            background-size: cover;
-            background-position: center;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    with st.sidebar:
-        st.button("CLOSE", key="close", on_click=close_sidebar)
-
-# ----------------------------------------------------
-# Sidebar CLOSED
-# ----------------------------------------------------
-else:
-    st.button("OPEN", key="open", on_click=open_sidebar)
-
-# ----------------------------------------------------
-# Main app
-# ----------------------------------------------------
-st.title("Main App – No JS Toggle System")
+# ------------------------------------------------------------------------------
+# MAIN CONTENT
+# ------------------------------------------------------------------------------
+st.title("Main App – Fixed HUD Toggle System")
 st.write("Sidebar open:", st.session_state.sidebar_open)
-

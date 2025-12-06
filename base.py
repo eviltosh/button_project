@@ -104,7 +104,7 @@ section[data-testid="stSidebar"]{ display:none !important; }
 
 <div id="customSidebar" aria-hidden="true">
   <div id="cs-header">
-    <button id="purple-close" aria-label="Close sidebar">✖ Close</button>
+    <button id="purple-close" aria-label="Close sidebar">✖ CLOSE</button>
   </div>
 
   <div id="cs-content">

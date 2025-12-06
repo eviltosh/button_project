@@ -1,124 +1,97 @@
 import streamlit as st
-import streamlit.components.v1 as components
 
-st.set_page_config(initial_sidebar_state="expanded")
+st.set_page_config(layout="wide")
 
-# -----------------------------------------------------------------------------
-# JAVASCRIPT — CLEAN, SINGLE-STRING, NO SYNTAX ERRORS
-# -----------------------------------------------------------------------------
-sidebar_control_js = """
+# ---------------------------------------------
+# CSS: Neon purple button (fully clickable)
+# ---------------------------------------------
+st.markdown("""
+<style>
+/* Sidebar container override */
+section[data-testid="stSidebar"] {
+    width: 300px !important;
+}
+
+/* WRAPPER to isolate the button from Streamlit's sidebar DOM */
+#neon-btn-wrapper {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    pointer-events: none;  /* parent NON-interactive */
+}
+
+/* Actual neon button */
+#neon-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    background: #a020f0;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+    box-shadow: 0 0 12px #d26bff, 0 0 24px #a020f0;
+
+    pointer-events: auto;  /* BUT button IS interactive */
+}
+
+#neon-btn:hover {
+    box-shadow: 0 0 16px #ff7aff, 0 0 32px #b152ff;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ---------------------------------------------
+# JS: Communicate button click → Streamlit
+# ---------------------------------------------
+st.markdown("""
 <script>
-window.forceCloseSidebar = function() {
-    // 1) Try native toggle buttons by title
-    try {
-        const t1 = document.querySelector("button[title='Collapse sidebar']");
-        const t2 = document.querySelector("button[title='Toggle sidebar']");
-        if (t1) { t1.click(); return; }
-        if (t2) { t2.click(); return; }
-    } catch(e) {}
-
-    // 2) DOM-walk through parent frames to find the actual sidebar
-    try {
-        let doc = document;
-        for (let i = 0; i < 10; i++) {
-            const sb = doc.querySelector('[data-testid="stSidebar"]');
-            if (sb) {
-                sb.style.width = "0px";
-                sb.style.minWidth = "0px";
-                sb.style.maxWidth = "0px";
-                sb.style.overflow = "hidden";
-                sb.style.pointerEvents = "none";
-                return;
-            }
-            try { 
-                doc = doc.defaultView.parent.document; 
-            } catch(e) { 
-                break; 
-            }
-        }
-    } catch(e) {}
-
-    // 3) postMessage fallback for Android WebView wrappers
-    try { 
-        window.parent.postMessage({type:"streamlit:closeSidebar"}, "*"); 
-    } catch(e) {}
-};
-
-window.restoreSidebar = function() {
-    try {
-        let doc = document;
-        for (let i = 0; i < 10; i++) {
-            const sb = doc.querySelector('[data-testid="stSidebar"]');
-            if (sb) {
-                sb.style.width = "";
-                sb.style.minWidth = "";
-                sb.style.maxWidth = "";
-                sb.style.overflow = "";
-                sb.style.pointerEvents = "";
-                return;
-            }
-            try { 
-                doc = doc.defaultView.parent.document; 
-            } catch(e) { 
-                break; 
-            }
-        }
-    } catch(e) {}
-
-    try { 
-        window.parent.postMessage({type:"streamlit:restoreSidebar"}, "*"); 
-    } catch(e) {}
-};
+function neonClick() {
+    window.parent.postMessage({button: "pressed"}, "*");
+}
 </script>
-"""
+""", unsafe_allow_html=True)
 
-components.html(sidebar_control_js, height=0, width=0)
-
-# -----------------------------------------------------------------------------
-# SIDEBAR WITH NEON CLOSE BUTTON
-# -----------------------------------------------------------------------------
+# ---------------------------------------------
+# Sidebar UI
+# ---------------------------------------------
 with st.sidebar:
-    components.html(
-        """
-        <style>
-        .neon-close-btn {
-            position: absolute;
-            top: 8px;
-            right: 10px;
-            padding: 8px 14px;
-            background: linear-gradient(90deg, #8a2be2, #b57bff);
-            border-radius: 10px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 0 12px rgba(160,32,240,0.85), 0 0 20px rgba(180,120,255,0.45);
-            border: none;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .neon-close-btn:hover { transform: scale(1.03); }
-        .neon-close-btn:active { transform: scale(.97); }
-        </style>
-
-        <button class="neon-close-btn"
-            onclick="try{window.forceCloseSidebar();}catch(e){}">
-            ✕ Close
-        </button>
-        """,
-        height=50
-    )
+    st.markdown("""
+    <div id="neon-btn-wrapper">
+        <button id="neon-btn" onclick="neonClick()">✖ Close</button>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.write("Sidebar Online, Major Tom.")
 
-# -----------------------------------------------------------------------------
-# MAIN PAGE
-# -----------------------------------------------------------------------------
+
+# ---------------------------------------------
+# Listen for message from JS
+# ---------------------------------------------
+msg = st.experimental_get_query_params().get("button-state", [""])[0]
+
 st.title("Neon Sidebar Control Test")
 
-if st.button("Reopen Sidebar"):
-    components.html(
-        "<script>try{window.restoreSidebar();}catch(e){}</script>",
-        height=0
-    )
-    st.success("Restore command sent.")
+# Script to listen in browser
+st.markdown("""
+<script>
+window.addEventListener("message", (event) => {
+    if (event.data.button === "pressed") {
+        const query = new URLSearchParams(window.location.search);
+        query.set("button-state", "pressed");
+        window.location.search = query.toString();
+    }
+});
+</script>
+""", unsafe_allow_html=True)
 
-st.write("Sidebar controls loaded.")
+if msg == "pressed":
+    st.success("Close button pressed.")
+else:
+    st.info("Waiting for input…")

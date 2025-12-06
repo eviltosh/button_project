@@ -1,66 +1,50 @@
-import os
 import streamlit as st
+import streamlit.components.v1 as components
 
-
-
-# Force sidebar expanded
 st.set_page_config(initial_sidebar_state="expanded")
 
-import os, glob, streamlit as st
-st.write("PY FILES IN THIS PROJECT:", glob.glob("*.py"))
-
-st.write("Running file:", os.path.abspath(__file__))
-
-# --- CUSTOM CSS FOR PURPLE NEON BUTTON ---
-st.markdown("""
-    <style>
-    /* Sidebar container */
-    [data-testid="stSidebar"] {
-        background-color: #0b0b0f;
-        padding-top: 20px;
-        position: relative;
+# ---- CUSTOM JS TO CLOSE SIDEBAR ----
+close_js = """
+<script>
+    function closeSidebar() {
+        const sidebar = window.parent.document.querySelector("section[data-testid='stSidebar']");
+        if (sidebar) {
+            sidebar.style.display = 'none';
+        }
     }
+</script>
+"""
 
-    /* Container for right-aligned button */
-    .neon-btn-container {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        z-index: 9999;
-    }
+# ---- DISPLAY JS ----
+components.html(close_js, height=0, width=0)
 
-    /* Neon purple button */
-    .neon-btn {
-        padding: 8px 18px;
-        color: white;
-        background: #7d00ff;
-        border: 2px solid #c878ff;
-        border-radius: 10px;
-        font-weight: bold;
-        cursor: pointer;
-        text-shadow: 0 0 8px #d18dff;
-        box-shadow: 0 0 12px #b14fff, 0 0 20px #7d00ff;
-        transition: 0.2s ease-in-out;
-    }
-
-    .neon-btn:hover {
-        box-shadow: 0 0 20px #c878ff, 0 0 40px #a040ff;
-        transform: scale(1.06);
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# --- SIDEBAR CONTENT ---
+# ---- SIDEBAR ----
 with st.sidebar:
-    st.markdown("""
-        <div class="neon-btn-container">
-            <button class="neon-btn" onclick="window.location.href='#'">PRESS</button>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        """
+        <style>
+        .neon-close {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: #9b4dff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 0 12px #b06fff;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    st.header("Sidebar Content")
-    st.write("Operational neon button online, Corporal.")
+    # Button that triggers JS
+    clicked = st.button("✕ Close", key="close_button")
 
-# Main app
-st.title("Neon Button Test App")
-st.write("Sidebar with top-right neon button load
+    if clicked:
+        components.html("<script>closeSidebar()</script>", height=0, width=0)
+
+# ---- MAIN PAGE ----
+st.write("Sidebar loaded. Close button is active, Major Tom.")

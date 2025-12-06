@@ -112,7 +112,7 @@ section[data-testid="stSidebar"]{ display:none !important; }
   </div>
 </div>
 
-<button id="neon-open-btn" aria-label="Open sidebar">OPEN SIDEBAR</button>
+<button id="neon-open-btn" aria-label="Open sidebar">OPEN</button>
 
 <script>
 (function(){

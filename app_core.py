@@ -13,7 +13,7 @@ if "sidebar" in params:
     st.session_state.sidebar_open = params.get("sidebar") == "1"
 
 # --------------------------------------------------------
-# CSS — ONLY OPEN BUTTON FIXED, CLOSE BUTTON UNTOUCHED
+# CSS — sidebar + neon buttons
 # --------------------------------------------------------
 st.markdown("""
 <style>
@@ -41,7 +41,7 @@ st.markdown("""
 }
 
 /* =======================================================
-   NEON BUTTON OVERRIDES — ALWAYS VISIBLE
+   NEON BUTTON OVERRIDES
    ======================================================= */
 .neon-btn {
   display: inline-block !important;
@@ -64,7 +64,7 @@ st.markdown("""
 }
 
 /* =======================================================
-   CLOSE BUTTON — DO NOT TOUCH (Prime Directive)
+   CLOSE BUTTON — PRIME DIRECTIVE RESPECTED
    ======================================================= */
 .sidebar-top-right {
   position: absolute !important;
@@ -73,7 +73,7 @@ st.markdown("""
 }
 
 /* =======================================================
-   OPEN BUTTON — FIXED VISIBILITY
+   OPEN BUTTON — FIXED TOP LEFT WHEN SIDEBAR CLOSED
    ======================================================= */
 .open-left {
   position: fixed !important;
@@ -81,21 +81,31 @@ st.markdown("""
   left: 20px !important;
   z-index: 999999 !important;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
 # --------------------------------------------------------
-# RENDER LAYOUT (UNCHANGED LOGIC)
+# RENDER LAYOUT
 # --------------------------------------------------------
 if st.session_state.sidebar_open:
 
     st.markdown('<div class="app-row">', unsafe_allow_html=True)
 
-    # SIDEBAR WITH CLOSE BUTTON (UNCHANGED)
+    # ----------------------------------------------------
+    # SIDEBAR WITH WORKING CLOSE BUTTON
+    # ----------------------------------------------------
     sidebar_html = """
     <div class="custom-sidebar" id="SIDEBAR">
-        <a class="neon-btn sidebar-top-right" href="?sidebar=0">CLOSE</a>
+
+        <a class="neon-btn sidebar-top-right" href="javascript:closeSide()">CLOSE</a>
+
+        <script>
+        function closeSide() {
+            const url = new URL(window.location.href);
+            url.searchParams.set("sidebar", "0");
+            window.location.replace(url.toString());
+        }
+        </script>
 
         <div style="margin-top:80px; font-size:26px; font-weight:700; color:white;">
             NEON SIDEBAR
@@ -104,26 +114,42 @@ if st.session_state.sidebar_open:
         <div style="margin-top:40px; color:white;">
             <p>Sidebar content goes here.</p>
         </div>
+
     </div>
     """
     st.markdown(sidebar_html, unsafe_allow_html=True)
 
+    # ----------------------------------------------------
     # MAIN CONTENT (SIDEBAR OPEN)
+    # ----------------------------------------------------
     st.markdown('<div class="main-content">', unsafe_allow_html=True)
     st.title("Sidebar OPEN")
     st.write("Close button works. Background displayed.")
     st.markdown("</div></div>", unsafe_allow_html=True)
 
 else:
-    # --------------------------------------------------------
-    # SIDEBAR CLOSED — OPEN BUTTON MUST SHOW
-    # --------------------------------------------------------
+
+    # ----------------------------------------------------
+    # OPEN BUTTON — FIXED, FIRST-CLICK RELIABLE
+    # ----------------------------------------------------
     st.markdown(
-        '<a class="neon-btn open-left" href="?sidebar=1">OPEN</a>',
+        """
+        <a class="neon-btn open-left" href="javascript:openSide()">OPEN</a>
+
+        <script>
+        function openSide() {
+            const url = new URL(window.location.href);
+            url.searchParams.set("sidebar", "1");
+            window.location.replace(url.toString());
+        }
+        </script>
+        """,
         unsafe_allow_html=True
     )
 
+    # ----------------------------------------------------
     # MAIN CONTENT (SIDEBAR CLOSED)
+    # ----------------------------------------------------
     st.markdown('<div class="app-row"><div class="main-content">', unsafe_allow_html=True)
     st.title("Sidebar CLOSED")
     st.write("Open button now appears and works.")

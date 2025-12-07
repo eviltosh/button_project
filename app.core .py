@@ -1,168 +1,131 @@
+# app.core.py  (overwrite your current file)
 import streamlit as st
-import streamlit.components.v1 as components
 
-st.set_page_config(layout="wide")
+# Page config
+st.set_page_config(layout="wide", page_title="Custom Sidebar — Reliable")
 
-# --------------------------------------------------------
-# STATE CONTROL (now purely internal)
-# --------------------------------------------------------
+# -------------------------
+# Session-state: sidebar open/closed
+# -------------------------
 if "sidebar_open" not in st.session_state:
-    st.session_state.sidebar_open = True
+    st.session_state.sidebar_open = True  # default open
 
-# --------------------------------------------------------
-# CSS — SAME DESIGN, SAME CLOSE BUTTON, SAME OPEN BUTTON
-# --------------------------------------------------------
-st.markdown("""
-<style>
+# -------------------------
+# Neon styling for Streamlit buttons and sidebar visuals
+# (Targets Streamlit rendered <button> elements; uses !important to override themes)
+# -------------------------
+st.markdown(
+    """
+    <style>
+    /* Sidebar background mimic for the left column */
+    .custom-sidebar-box {
+        background-image: url('https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        padding: 20px;
+        box-sizing: border-box;
+        color: white;
+    }
 
-.app-row {
-  display: flex;
-  width: 100%;
-}
+    /* Neon style for Streamlit buttons */
+    div.stButton > button, button.css-1emrehy { /* fallback selector for some versions */
+        background: linear-gradient(135deg,#9b00ff 0%,#b300ff 100%) !important;
+        color: #fff !important;
+        border-radius: 12px !important;
+        padding: 10px 18px !important;
+        font-weight: 700 !important;
+        border: 2px solid #b300ff !important;
+        box-shadow: 0 8px 30px rgba(179,0,255,0.28), 0 0 36px rgba(179,0,255,0.18) inset !important;
+    }
 
-.custom-sidebar {
-  width: 360px;
-  min-height: 100vh;
-  padding: 24px 20px;
-  background-image: url('https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: fixed;
-  top: 0;
-  left: 0;
-  transition: transform 0.35s ease-in-out;
-  z-index: 9999998;
-}
+    /* Smaller button when desired */
+    .neon-small button {
+        padding: 8px 14px !important;
+        font-size: 14px !important;
+    }
 
-.custom-sidebar.closed {
-  transform: translateX(-380px);
-}
+    /* Position helpers inside the sidebar column */
+    .sidebar-top-row {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
 
-/* MAIN CONTENT */
-.main-content {
-  flex: 1;
-  padding: 24px;
-  margin-left: 380px;
-}
+    /* Make main content area sit flush when sidebar is open/closed */
+    .main-area {
+        padding: 24px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-/* Adjust when sidebar is closed */
-.main-content.sidebar-closed {
-  margin-left: 0px;
-}
-
-/* =======================================================
-   NEON BUTTON (UNCHANGED STYLE)
-   ======================================================= */
-.neon-btn {
-  text-decoration: none !important;
-  color: #ffffff !important;
-  background: linear-gradient(135deg, #9b00ff 0%, #b300ff 100%) !important;
-  padding: 12px 20px !important;
-  font-weight: 700 !important;
-  font-size: 15px !important;
-  border-radius: 12px !important;
-  box-shadow: 0 0 12px #b300ff, 0 0 28px rgba(179,0,255,0.7) !important;
-  border: 2px solid #b300ff !important;
-  cursor: pointer !important;
-  display: inline-block !important;
-  position: fixed !important;
-  z-index: 9999999 !important;
-}
-
-/* CLOSE BUTTON (UNCHANGED POSITION) */
-#close-btn {
-  top: 18px;
-  left: 300px;
-}
-
-/* OPEN BUTTON (UNCHANGED POSITION) */
-#open-btn {
-  top: 20px;
-  left: 20px;
-}
-
-/* Hide open button when sidebar is visible */
-#open-btn.hidden {
-  display: none !important;
-}
-
-/* Hide close button when sidebar is hidden */
-#close-btn.hidden {
-  display: none !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# --------------------------------------------------------
-# HTML + JS — No Page Reload, No Navigation
-# --------------------------------------------------------
-
-html = f"""
-<div id="sidebar" class="custom-sidebar {'open' if st.session_state.sidebar_open else 'closed'}">
-
-    <button id="close-btn" class="neon-btn {'hidden' if not st.session_state.sidebar_open else ''}" onclick="closeSidebar()">
-        CLOSE
-    </button>
-
-    <div style="margin-top:80px; font-size:26px; font-weight:700; color:white;">
-        NEON SIDEBAR
-    </div>
-
-    <div style="margin-top:40px; color:white;">
-        <p>Sidebar content goes here.</p>
-    </div>
-
-</div>
-
-<button id="open-btn" class="neon-btn {'hidden' if st.session_state.sidebar_open else ''}" onclick="openSidebar()">
-    OPEN
-</button>
-
-<script>
-
-function openSidebar() {{
-    const s = window.parent.document.getElementById("sidebar");
-    const o = window.parent.document.getElementById("open-btn");
-    const c = window.parent.document.getElementById("close-btn");
-
-    s.classList.remove("closed");
-    s.classList.add("open");
-
-    o.classList.add("hidden");
-    c.classList.remove("hidden");
-}}
-
-function closeSidebar() {{
-    const s = window.parent.document.getElementById("sidebar");
-    const o = window.parent.document.getElementById("open-btn");
-    const c = window.parent.document.getElementById("close-btn");
-
-    s.classList.remove("open");
-    s.classList.add("closed");
-
-    o.classList.remove("hidden");
-    c.classList.add("hidden");
-}}
-
-</script>
-"""
-
-components.html(html, height=0)
-
-# --------------------------------------------------------
-# MAIN CONTENT
-# --------------------------------------------------------
-sidebar_closed_class = "sidebar-closed" if not st.session_state.sidebar_open else ""
-
-st.markdown(f'<div class="main-content {sidebar_closed_class}">', unsafe_allow_html=True)
-
+# -------------------------
+# Layout logic:
+# - When sidebar is open: render a left column (sidebar) + right column (main)
+# - When sidebar is closed: render only main column (full width) but show OPEN button at top-left inside main
+# -------------------------
 if st.session_state.sidebar_open:
-    st.title("Sidebar OPEN")
+    # 2 columns: sidebar (1) and main (4) -> adjust ratio as desired
+    sidebar_col, main_col = st.columns([1, 4])
+
+    # Sidebar column
+    with sidebar_col:
+        # Container that carries background image via CSS class
+        st.markdown('<div class="custom-sidebar-box">', unsafe_allow_html=True)
+
+        # Top row inside sidebar: keep CLOSE button at top-right (prime directive)
+        # We create two columns inside the sidebar area: left filler + right for the button
+        c1, c2 = st.columns([4, 1])
+        with c1:
+            st.write("")  # filler - preserves location so close is top-right
+        with c2:
+            # CLOSE button (streamlit button) — preserved behavior; when clicked it flips state
+            if st.button("CLOSE"):
+                st.session_state.sidebar_open = False
+
+        # Sidebar title & content (keeps the original visuals/content)
+        st.markdown('<div style="margin-top:40px; font-size:24px; font-weight:800; color:white;">NEON SIDEBAR</div>', unsafe_allow_html=True)
+        st.markdown('<div style="margin-top:20px; color:white;">Sidebar content goes here.</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)  # close custom-sidebar-box
+
+    # Main column
+    with main_col:
+        st.markdown('<div class="main-area">', unsafe_allow_html=True)
+        st.title("Sidebar OPEN")
+        st.write("Close button is top-right in the sidebar. Background image displays. This is the stable mode.")
+        # put example widgets (interactive)
+        st.text_input("Example input")
+        st.selectbox("Example select", ["One", "Two", "Three"])
+        st.slider("Example slider", 0, 100, 25)
+        st.markdown('</div>', unsafe_allow_html=True)
+
 else:
+    # Sidebar closed: show full-width main content, but provide an OPEN button at top-left
+    st.markdown('<div class="main-area">', unsafe_allow_html=True)
+
+    # Place the OPEN button in a tiny two-column row so it appears left-aligned
+    left_col, right_col = st.columns([1, 6])
+    with left_col:
+        # Use a smaller neon button style optionally
+        if st.button("OPEN"):
+            st.session_state.sidebar_open = True
+    with right_col:
+        st.write("")  # filler
+
     st.title("Sidebar CLOSED")
+    st.write("Sidebar is collapsed. Click OPEN to show it again.")
+    # example widgets in closed state
+    st.text_input("Example input")
+    st.selectbox("Example select", ["A", "B", "C"])
+    st.slider("Example slider", 0, 50, 10)
 
-st.write("Open + Close now work WITHOUT page navigation and WITHOUT breaking design.")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("</div>", unsafe_allow_html=True)
+# -------------------------
+# Debug info (optional; remove if you don't want it)
+# -------------------------
+st.markdown("---")
+st.write("session_state.sidebar_open:", st.session_state.sidebar_open)

@@ -3,94 +3,97 @@ import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide")
 
-# ------------------------------------------------------------------------------
-# STATE
-# ------------------------------------------------------------------------------
-if "sidebar_open" not in st.session_state:
-    st.session_state.sidebar_open = True
+# --------------------------------------------------------
+# QUERY PARAMS STATE
+# --------------------------------------------------------
+params = st.query_params
+sidebar_open = params.get("sidebar", "1") == "1"   # default open
 
-# ------------------------------------------------------------------------------
-# HTML, CSS, JS
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------
+# UPDATE QUERY PARAMS
+# --------------------------------------------------------
+def set_sidebar_state(is_open: bool):
+    st.query_params["sidebar"] = "1" if is_open else "0"
 
-html_code = f"""
+# --------------------------------------------------------
+# CSS + HTML + JS
+# --------------------------------------------------------
+html = f"""
 <style>
 
-/* --- FIXED OPEN BUTTON (MAIN PAGE) --- */
+:root {{
+    /* REAL Streamlit Cloud sidebar width */
+    --sidebar-width: 380px;
+}}
+
 #open-btn {{
     position: fixed;
     top: 20px;
     left: 20px;
-    z-index: 99999;
+    z-index: 999999;
     background: #00ff66;
     color: black;
     padding: 12px 22px;
     border-radius: 10px;
     border: none;
     font-size: 18px;
-    font-weight: 700;
+    font-weight: bold;
     box-shadow: 0 0 15px #00ff66;
     cursor: pointer;
-    display: {'block' if not st.session_state.sidebar_open else 'none'};
+    display: {"none" if sidebar_open else "block"};
 }}
 
-/* --- FIXED CLOSE BUTTON (INSIDE SIDEBAR AREA) --- */
 #close-btn {{
     position: fixed;
     top: 20px;
-    left: 270px; /* slightly inside sidebar */
-    z-index: 99999;
+    left: calc(var(--sidebar-width) - 120px); /* PERFECT position */
+    z-index: 999999;
     background: #b300ff;
     color: white;
     padding: 12px 22px;
     border-radius: 10px;
     border: none;
     font-size: 18px;
-    font-weight: 700;
+    font-weight: bold;
     box-shadow: 0 0 15px #b300ff;
     cursor: pointer;
-    display: {'block' if st.session_state.sidebar_open else 'none'};
+    display: {"block" if sidebar_open else "none"};
 }}
 
-/* --- SIDEBAR BACKGROUND --- */
 section[data-testid="stSidebar"] {{
     background-image: url("https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png");
-    background-size: cover;
-    background-position: center;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    min-height: 100vh !important;
 }}
 
 </style>
 
-<button id="open-btn" onclick="openSidebar()">OPEN</button>
-<button id="close-btn" onclick="closeSidebar()">CLOSE</button>
+<button id="open-btn" onclick="openSide()">OPEN</button>
+<button id="close-btn" onclick="closeSide()">CLOSE</button>
 
 <script>
-function openSidebar() {{
-    fetch('/open', {{method: 'POST'}}).then(() => window.parent.location.reload());
+function openSide() {{
+    const url = new URL(window.location.href);
+    url.searchParams.set("sidebar", "1");
+    window.location.href = url.toString();
 }}
-function closeSidebar() {{
-    fetch('/close', {{method: 'POST'}}).then(() => window.parent.location.reload());
+function closeSide() {{
+    const url = new URL(window.location.href);
+    url.searchParams.set("sidebar", "0");
+    window.location.href = url.toString();
 }}
 </script>
 """
 
-components.html(html_code, height=0)
+components.html(html, height=0)
 
-# ------------------------------------------------------------------------------
-# PYTHON ENDPOINTS FOR JS
-# ------------------------------------------------------------------------------
-@st.experimental_rpc("open", kind="http")
-def api_open():
-    st.session_state.sidebar_open = True
-    return True
-
-@st.experimental_rpc("close", kind="http")
-def api_close():
-    st.session_state.sidebar_open = False
-    return True
-
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------
 # MAIN CONTENT
-# ------------------------------------------------------------------------------
-st.title("Main App – Fixed HUD Toggle System")
-st.write("Sidebar open:", st.session_state.sidebar_open)
+# --------------------------------------------------------
+if sidebar_open:
+    st.sidebar.write("Sidebar is OPEN")
+
+st.title("Sidebar Toggle System — FINAL FIXED VERSION")
+st.write("Sidebar open:", sidebar_open)

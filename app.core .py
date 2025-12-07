@@ -1,130 +1,93 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide")
 
-# --------------------------------------------------------
-# STATE CONTROL
-# --------------------------------------------------------
-if "sidebar_open" not in st.session_state:
-    st.session_state.sidebar_open = True
+# ------------------------------------------------------------------
+#   HTML + CSS + JS — REAL SIDEBAR TOGGLE (NO PAGE RELOAD)
+# ------------------------------------------------------------------
 
-params = st.query_params
-if "sidebar" in params:
-    st.session_state.sidebar_open = params.get("sidebar") == "1"
-
-# --------------------------------------------------------
-# CSS — ONLY OPEN BUTTON FIXED, CLOSE BUTTON UNTOUCHED
-# --------------------------------------------------------
-st.markdown("""
+html = """
 <style>
-/* Layout containers */
-.app-row {
-  display: flex;
-  width: 100%;
+/* Sidebar background */
+section[data-testid="stSidebar"] {
+    background-image: url("https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png");
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    min-height: 100vh;
+    transition: transform 0.35s ease-in-out;
 }
 
-.custom-sidebar {
-  width: 360px;
-  min-height: 100vh;
-  padding: 24px 20px;
-  background-image: url('https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
+/* Hidden state (slide left) */
+.sidebar-closed {
+    transform: translateX(-380px);
 }
 
-/* MAIN CONTENT */
-.main-content {
-  flex: 1;
-  padding: 24px;
+/* Open state */
+.sidebar-open {
+    transform: translateX(0px);
 }
 
-/* =======================================================
-   NEON BUTTON OVERRIDES — ALWAYS VISIBLE
-   ======================================================= */
-.neon-btn {
-  display: inline-block !important;
-  text-decoration: none !important;
-  color: #ffffff !important;
-  background: linear-gradient(135deg, #9b00ff 0%, #b300ff 100%) !important;
-  padding: 12px 20px !important;
-  font-weight: 700 !important;
-  font-size: 15px !important;
-  border-radius: 12px !important;
-  box-shadow: 0 0 12px #b300ff, 0 0 28px rgba(179,0,255,0.7) !important;
-  border: 2px solid #b300ff !important;
-  opacity: 1 !important;
-  z-index: 999999 !important;
+/* Neon buttons */
+.toggle-btn {
+    position: fixed;
+    top: 25px;
+    z-index: 999999999;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: bold;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(135deg, #9b00ff 0%, #c200ff 100%);
+    box-shadow: 0 0 18px #b300ff55, 0 0 30px #b300ffaa inset;
 }
 
-.neon-btn:hover {
-  box-shadow: 0 0 15px #d400ff, 0 0 40px rgba(212,0,255,0.9) !important;
-  transform: scale(1.05);
+/* Open button */
+#open-btn {
+    left: 20px;
+    display: none;
 }
 
-/* =======================================================
-   CLOSE BUTTON — DO NOT TOUCH (Prime Directive)
-   ======================================================= */
-.sidebar-top-right {
-  position: absolute !important;
-  top: 18px !important;
-  right: 18px !important;
+/* Close button (inside sidebar) */
+#close-btn {
+    left: 310px;
+    display: block;
 }
-
-/* =======================================================
-   OPEN BUTTON — FIXED VISIBILITY
-   ======================================================= */
-.open-left {
-  position: fixed !important;
-  top: 20px !important;
-  left: 20px !important;
-  z-index: 999999 !important;
-}
-
 </style>
-""", unsafe_allow_html=True)
 
-# --------------------------------------------------------
-# RENDER LAYOUT (UNCHANGED LOGIC)
-# --------------------------------------------------------
-if st.session_state.sidebar_open:
+<script>
+// Toggle logic (no reload, no navigation)
+function closeSidebar() {
+    const sidebar = window.parent.document.querySelector('section[data-testid="stSidebar"]');
+    sidebar.classList.remove("sidebar-open");
+    sidebar.classList.add("sidebar-closed");
 
-    st.markdown('<div class="app-row">', unsafe_allow_html=True)
+    window.parent.document.getElementById("open-btn").style.display = "block";
+    window.parent.document.getElementById("close-btn").style.display = "none";
+}
 
-    # SIDEBAR WITH CLOSE BUTTON (UNCHANGED)
-    sidebar_html = """
-    <div class="custom-sidebar" id="SIDEBAR">
-        <a class="neon-btn sidebar-top-right" href="?sidebar=0">CLOSE</a>
+function openSidebar() {
+    const sidebar = window.parent.document.querySelector('section[data-testid="stSidebar"]');
+    sidebar.classList.remove("sidebar-closed");
+    sidebar.classList.add("sidebar-open");
 
-        <div style="margin-top:80px; font-size:26px; font-weight:700; color:white;">
-            NEON SIDEBAR
-        </div>
+    window.parent.document.getElementById("open-btn").style.display = "none";
+    window.parent.document.getElementById("close-btn").style.display = "block";
+}
+</script>
 
-        <div style="margin-top:40px; color:white;">
-            <p>Sidebar content goes here.</p>
-        </div>
-    </div>
-    """
-    st.markdown(sidebar_html, unsafe_allow_html=True)
+<!-- External buttons rendered into parent DOM -->
+<button id="open-btn" class="toggle-btn" onclick="openSidebar()">OPEN</button>
+<button id="close-btn" class="toggle-btn" onclick="closeSidebar()">CLOSE</button>
+"""
 
-    # MAIN CONTENT (SIDEBAR OPEN)
-    st.markdown('<div class="main-content">', unsafe_allow_html=True)
-    st.title("Sidebar OPEN")
-    st.write("Close button works. Background displayed.")
-    st.markdown("</div></div>", unsafe_allow_html=True)
+components.html(html, height=0)
 
-else:
-    # --------------------------------------------------------
-    # SIDEBAR CLOSED — OPEN BUTTON MUST SHOW
-    # --------------------------------------------------------
-    st.markdown(
-        '<a class="neon-btn open-left" href="?sidebar=1">OPEN</a>',
-        unsafe_allow_html=True
-    )
-
-    # MAIN CONTENT (SIDEBAR CLOSED)
-    st.markdown('<div class="app-row"><div class="main-content">', unsafe_allow_html=True)
-    st.title("Sidebar CLOSED")
-    st.write("Open button now appears and works.")
-    st.markdown("</div></div>", unsafe_allow_html=True)
+# ------------------------------------------------------------------
+#   MAIN PAGE CONTENT
+# ------------------------------------------------------------------
+st.title("Sidebar Toggle — No Navigation Version")
+st.write("Close/Open both work instantly without leaving the page.")

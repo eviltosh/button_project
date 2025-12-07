@@ -3,91 +3,115 @@ import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide")
 
-# ------------------------------------------------------------------
-#   HTML + CSS + JS — REAL SIDEBAR TOGGLE (NO PAGE RELOAD)
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
+# STATE (Streamlit-safe)
+# ----------------------------------------------------------
+if "sidebar_open" not in st.session_state:
+    st.session_state.sidebar_open = True
 
-html = """
+# ----------------------------------------------------------
+# CSS – Hide real Streamlit sidebar toggle
+# ----------------------------------------------------------
+st.markdown("""
 <style>
-/* Sidebar background */
-section[data-testid="stSidebar"] {
-    background-image: url("https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png");
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    min-height: 100vh;
-    transition: transform 0.35s ease-in-out;
-}
+button[kind="header"] { visibility: hidden; }
+</style>
+""", unsafe_allow_html=True)
 
-/* Hidden state (slide left) */
-.sidebar-closed {
-    transform: translateX(-380px);
-}
-
-/* Open state */
-.sidebar-open {
-    transform: translateX(0px);
-}
-
-/* Neon buttons */
-.toggle-btn {
+# ----------------------------------------------------------
+# CUSTOM SIDEBAR + BUTTONS (ALWAYS VISIBLE)
+# ----------------------------------------------------------
+html = f"""
+<style>
+/* CONTAINER */
+#custom-sidebar {{
     position: fixed;
-    top: 25px;
-    z-index: 999999999;
-    padding: 12px 24px;
-    font-size: 15px;
-    font-weight: bold;
+    top: 0;
+    left: 0;
+    width: 380px;
+    height: 100vh;
+    background-image: url("https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: transform 0.35s ease-in-out;
+    z-index: 999999;
+    padding: 30px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    color: white;
+}}
+
+/* CLOSED STATE */
+#custom-sidebar.closed {{
+    transform: translateX(-380px);
+}}
+
+/* OPEN STATE */
+#custom-sidebar.open {{
+    transform: translateX(0px);
+}}
+
+/* BUTTON STYLES */
+.neon-btn {{
+    position: fixed;
+    top: 20px;
+    padding: 12px 22px;
     border-radius: 12px;
     border: none;
     cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
     color: white;
+    z-index: 999999999;
     background: linear-gradient(135deg, #9b00ff 0%, #c200ff 100%);
-    box-shadow: 0 0 18px #b300ff55, 0 0 30px #b300ffaa inset;
-}
+    box-shadow: 0 0 20px #b300ff99;
+}}
 
-/* Open button */
-#open-btn {
+#open-btn {{
     left: 20px;
-    display: none;
-}
+    display: {"none" if st.session_state.sidebar_open else "block"};
+}}
 
-/* Close button (inside sidebar) */
-#close-btn {
-    left: 310px;
-    display: block;
-}
+#close-btn {{
+    left: 300px;
+    display: {"block" if st.session_state.sidebar_open else "none"};
+}}
 </style>
 
+<div id="custom-sidebar" class="{ 'open' if st.session_state.sidebar_open else 'closed' }">
+    <h2>NEON SIDEBAR</h2>
+    <p>Sidebar content...</p>
+</div>
+
+<button id="open-btn" class="neon-btn" onclick="toggleSidebar(true)">OPEN</button>
+<button id="close-btn" class="neon-btn" onclick="toggleSidebar(false)">CLOSE</button>
+
 <script>
-// Toggle logic (no reload, no navigation)
-function closeSidebar() {
-    const sidebar = window.parent.document.querySelector('section[data-testid="stSidebar"]');
-    sidebar.classList.remove("sidebar-open");
-    sidebar.classList.add("sidebar-closed");
+function toggleSidebar(isOpen) {{
+    const sidebar = window.parent.document.querySelector("#custom-sidebar");
+    const openBtn = window.parent.document.querySelector("#open-btn");
+    const closeBtn = window.parent.document.querySelector("#close-btn");
 
-    window.parent.document.getElementById("open-btn").style.display = "block";
-    window.parent.document.getElementById("close-btn").style.display = "none";
-}
-
-function openSidebar() {
-    const sidebar = window.parent.document.querySelector('section[data-testid="stSidebar"]');
-    sidebar.classList.remove("sidebar-closed");
-    sidebar.classList.add("sidebar-open");
-
-    window.parent.document.getElementById("open-btn").style.display = "none";
-    window.parent.document.getElementById("close-btn").style.display = "block";
-}
+    if (isOpen) {{
+        sidebar.classList.remove("closed");
+        sidebar.classList.add("open");
+        openBtn.style.display = "none";
+        closeBtn.style.display = "block";
+    }} else {{
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+        openBtn.style.display = "block";
+        closeBtn.style.display = "none";
+    }}
+}}
 </script>
-
-<!-- External buttons rendered into parent DOM -->
-<button id="open-btn" class="toggle-btn" onclick="openSidebar()">OPEN</button>
-<button id="close-btn" class="toggle-btn" onclick="closeSidebar()">CLOSE</button>
 """
 
 components.html(html, height=0)
 
-# ------------------------------------------------------------------
-#   MAIN PAGE CONTENT
-# ------------------------------------------------------------------
-st.title("Sidebar Toggle — No Navigation Version")
-st.write("Close/Open both work instantly without leaving the page.")
+# ----------------------------------------------------------
+# PAGE CONTENT
+# ----------------------------------------------------------
+st.title("CUSTOM SIDEBAR — ALWAYS SHOWS BUTTONS")
+st.write("Buttons ALWAYS visible. No navigation. No glitches.")

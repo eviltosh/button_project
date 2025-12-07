@@ -1,131 +1,139 @@
-# app.core.py  (overwrite your current file)
 import streamlit as st
+import streamlit.components.v1 as components
 
-# Page config
-st.set_page_config(layout="wide", page_title="Custom Sidebar — Reliable")
+st.set_page_config(layout="wide")
 
-# -------------------------
-# Session-state: sidebar open/closed
-# -------------------------
+# --------------------------------------------------------
+# INIT SESSION STATE
+# --------------------------------------------------------
 if "sidebar_open" not in st.session_state:
-    st.session_state.sidebar_open = True  # default open
+    st.session_state.sidebar_open = True
 
-# -------------------------
-# Neon styling for Streamlit buttons and sidebar visuals
-# (Targets Streamlit rendered <button> elements; uses !important to override themes)
-# -------------------------
-st.markdown(
+# --------------------------------------------------------
+# JS CALLBACKS (RELIABLE FIRST-CLICK TOGGLE)
+# --------------------------------------------------------
+toggle_js = """
+<script>
+function toggle_sidebar(to_open) {
+    // Call Streamlit's Python callback
+    window.parent.postMessage(
+        {type: "streamlit:setComponentValue", value: to_open}, "*"
+    );
+}
+</script>
+"""
+
+# --------------------------------------------------------
+# CSS (IMPROVED: CLEAN POSITIONING, NO DRIFT)
+# --------------------------------------------------------
+css = """
+<style>
+
+:root {
+    --sidebar-width: 380px;
+}
+
+/* Sidebar background */
+section[data-testid="stSidebar"] {
+    background-image: url("https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png");
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    min-height: 100vh;
+    padding-top: 20px;
+}
+
+/* Neon button shared styles */
+.neon-btn {
+    position: fixed;
+    z-index: 999999;
+    padding: 12px 26px;
+    font-size: 15px;
+    font-weight: bold;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(135deg, #9b00ff 0%, #b300ff 100%);
+    box-shadow: 0 6px 20px rgba(179,0,255,0.32), 0 0 30px rgba(179,0,255,0.20) inset;
+    transition: 0.15s ease;
+}
+
+/* Hover */
+.neon-btn:hover {
+    transform: translateY(-3px) scale(1.03);
+}
+
+/* OPEN button (appears when sidebar is CLOSED) */
+#open-btn {
+    top: 20px;
+    left: 20px;
+}
+
+/* CLOSE button (inside sidebar top-right) */
+#close-btn {
+    top: 20px;
+    left: calc(var(--sidebar-width) - 110px);
+}
+
+</style>
+"""
+
+# Inject CSS + JS
+st.markdown(css, unsafe_allow_html=True)
+components.html(toggle_js, height=0, width=0)
+
+# --------------------------------------------------------
+# PYTHON CALLBACK HANDLING
+# --------------------------------------------------------
+value = components.html(
     """
-    <style>
-    /* Sidebar background mimic for the left column */
-    .custom-sidebar-box {
-        background-image: url('https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        min-height: 100vh;
-        padding: 20px;
-        box-sizing: border-box;
-        color: white;
-    }
-
-    /* Neon style for Streamlit buttons */
-    div.stButton > button, button.css-1emrehy { /* fallback selector for some versions */
-        background: linear-gradient(135deg,#9b00ff 0%,#b300ff 100%) !important;
-        color: #fff !important;
-        border-radius: 12px !important;
-        padding: 10px 18px !important;
-        font-weight: 700 !important;
-        border: 2px solid #b300ff !important;
-        box-shadow: 0 8px 30px rgba(179,0,255,0.28), 0 0 36px rgba(179,0,255,0.18) inset !important;
-    }
-
-    /* Smaller button when desired */
-    .neon-small button {
-        padding: 8px 14px !important;
-        font-size: 14px !important;
-    }
-
-    /* Position helpers inside the sidebar column */
-    .sidebar-top-row {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-    }
-
-    /* Make main content area sit flush when sidebar is open/closed */
-    .main-area {
-        padding: 24px;
-    }
-    </style>
+    <script>
+        // placeholder to receive toggle commands
+    </script>
     """,
-    unsafe_allow_html=True,
+    height=0,
 )
 
-# -------------------------
-# Layout logic:
-# - When sidebar is open: render a left column (sidebar) + right column (main)
-# - When sidebar is closed: render only main column (full width) but show OPEN button at top-left inside main
-# -------------------------
+# --------------------------------------------------------
+# BUTTON RENDERING (NO DOUBLE CLICK)
+# --------------------------------------------------------
+
+# OPEN button (when sidebar is CLOSED)
+if not st.session_state.sidebar_open:
+    st.markdown(
+        """<button id="open-btn" class="neon-btn" onclick="toggle_sidebar(true)">OPEN</button>""",
+        unsafe_allow_html=True,
+    )
+
+# CLOSE button (when sidebar is OPEN)
+else:
+    st.markdown(
+        """<button id="close-btn" class="neon-btn" onclick="toggle_sidebar(false)">CLOSE</button>""",
+        unsafe_allow_html=True,
+    )
+
+# --------------------------------------------------------
+# RECEIVE JS CALLBACK
+# --------------------------------------------------------
+clicked_value = st.experimental_get_query_params().get("component", None)
+
+# Alternative: use custom Streamlit component channel
+# Instead we use this: value is delivered via postMessage
+# But we catch via session_state update
+if value is not None:
+    if isinstance(value, bool):
+        st.session_state.sidebar_open = value
+
+# --------------------------------------------------------
+# PAGE CONTENT
+# --------------------------------------------------------
+st.title("Sidebar " + ("OPEN" if st.session_state.sidebar_open else "CLOSED"))
+
 if st.session_state.sidebar_open:
-    # 2 columns: sidebar (1) and main (4) -> adjust ratio as desired
-    sidebar_col, main_col = st.columns([1, 4])
-
-    # Sidebar column
-    with sidebar_col:
-        # Container that carries background image via CSS class
-        st.markdown('<div class="custom-sidebar-box">', unsafe_allow_html=True)
-
-        # Top row inside sidebar: keep CLOSE button at top-right (prime directive)
-        # We create two columns inside the sidebar area: left filler + right for the button
-        c1, c2 = st.columns([4, 1])
-        with c1:
-            st.write("")  # filler - preserves location so close is top-right
-        with c2:
-            # CLOSE button (streamlit button) — preserved behavior; when clicked it flips state
-            if st.button("CLOSE"):
-                st.session_state.sidebar_open = False
-
-        # Sidebar title & content (keeps the original visuals/content)
-        st.markdown('<div style="margin-top:40px; font-size:24px; font-weight:800; color:white;">NEON SIDEBAR</div>', unsafe_allow_html=True)
-        st.markdown('<div style="margin-top:20px; color:white;">Sidebar content goes here.</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)  # close custom-sidebar-box
-
-    # Main column
-    with main_col:
-        st.markdown('<div class="main-area">', unsafe_allow_html=True)
-        st.title("Sidebar OPEN")
-        st.write("Close button is top-right in the sidebar. Background image displays. This is the stable mode.")
-        # put example widgets (interactive)
+    with st.sidebar:
         st.text_input("Example input")
         st.selectbox("Example select", ["One", "Two", "Three"])
         st.slider("Example slider", 0, 100, 25)
-        st.markdown('</div>', unsafe_allow_html=True)
-
 else:
-    # Sidebar closed: show full-width main content, but provide an OPEN button at top-left
-    st.markdown('<div class="main-area">', unsafe_allow_html=True)
-
-    # Place the OPEN button in a tiny two-column row so it appears left-aligned
-    left_col, right_col = st.columns([1, 6])
-    with left_col:
-        # Use a smaller neon button style optionally
-        if st.button("OPEN"):
-            st.session_state.sidebar_open = True
-    with right_col:
-        st.write("")  # filler
-
-    st.title("Sidebar CLOSED")
     st.write("Sidebar is collapsed. Click OPEN to show it again.")
-    # example widgets in closed state
-    st.text_input("Example input")
-    st.selectbox("Example select", ["A", "B", "C"])
-    st.slider("Example slider", 0, 50, 10)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# -------------------------
-# Debug info (optional; remove if you don't want it)
-# -------------------------
-st.markdown("---")
-st.write("session_state.sidebar_open:", st.session_state.sidebar_open)

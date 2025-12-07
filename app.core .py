@@ -16,7 +16,7 @@ def set_sidebar_state(is_open: bool):
     st.query_params["sidebar"] = "1" if is_open else "0"
 
 # --------------------------------------------------------
-# CSS + HTML + JS
+# CSS + HTML + JS (FULLY FIXED)
 # --------------------------------------------------------
 html = f"""
 <style>
@@ -24,40 +24,34 @@ html = f"""
     --sidebar-width: 380px;
 }}
 
-#open-btn {{
+/* --- UNIVERSAL BUTTON STYLE (NEON PURPLE) --- */
+#open-btn, #close-btn {{
     position: fixed;
     top: 20px;
-    left: 20px;
+    right: 25px;               /* TOP RIGHT */
     z-index: 999999;
-    background: #00ff66;
-    color: black;
     padding: 12px 22px;
-    border-radius: 10px;
-    border: none;
     font-size: 18px;
     font-weight: bold;
-    box-shadow: 0 0 15px #00ff66;
+    border-radius: 12px;
+    border: none;
     cursor: pointer;
+    box-shadow: 0 0 18px #b300ff;
+    background: #b300ff;
+    color: white;
+}}
+
+/* show open only when sidebar is closed */
+#open-btn {{
     display: {"none" if sidebar_open else "block"};
 }}
 
+/* show close only when sidebar is open */
 #close-btn {{
-    position: fixed;
-    top: 20px;
-    left: calc(var(--sidebar-width) - 120px);
-    z-index: 999999;
-    background: #b300ff;
-    color: white;
-    padding: 12px 22px;
-    border-radius: 10px;
-    border: none;
-    font-size: 18px;
-    font-weight: bold;
-    box-shadow: 0 0 15px #b300ff;
-    cursor: pointer;
     display: {"block" if sidebar_open else "none"};
 }}
 
+/* --- SIDEBAR BACKGROUND --- */
 section[data-testid="stSidebar"] {{
     background-image: url("https://raw.githubusercontent.com/eviltosh/button_project/main/assets/control.png");
     background-size: cover !important;
@@ -71,16 +65,16 @@ section[data-testid="stSidebar"] {{
 <button id="close-btn" onclick="closeSide()">CLOSE</button>
 
 <script>
-function openSide() {
+function openSide() {{
     const url = new URL(window.location.href);
     url.searchParams.set("sidebar", "1");
     window.location.href = url.toString();
-}
-function closeSide() {
+}}
+function closeSide() {{
     const url = new URL(window.location.href);
     url.searchParams.set("sidebar", "0");
     window.location.href = url.toString();
-}
+}}
 </script>
 """
 

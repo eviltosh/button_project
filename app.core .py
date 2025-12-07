@@ -20,9 +20,7 @@ def set_sidebar_state(is_open: bool):
 # --------------------------------------------------------
 html = f"""
 <style>
-
 :root {{
-    /* REAL Streamlit Cloud sidebar width */
     --sidebar-width: 380px;
 }}
 
@@ -46,7 +44,7 @@ html = f"""
 #close-btn {{
     position: fixed;
     top: 20px;
-    left: calc(var(--sidebar-width) - 120px); /* PERFECT position */
+    left: calc(var(--sidebar-width) - 120px);
     z-index: 999999;
     background: #b300ff;
     color: white;
@@ -67,23 +65,22 @@ section[data-testid="stSidebar"] {{
     background-repeat: no-repeat !important;
     min-height: 100vh !important;
 }}
-
 </style>
 
 <button id="open-btn" onclick="openSide()">OPEN</button>
 <button id="close-btn" onclick="closeSide()">CLOSE</button>
 
 <script>
-function openSide() {{
+function openSide() {
     const url = new URL(window.location.href);
     url.searchParams.set("sidebar", "1");
     window.location.href = url.toString();
-}}
-function closeSide() {{
+}
+function closeSide() {
     const url = new URL(window.location.href);
     url.searchParams.set("sidebar", "0");
     window.location.href = url.toString();
-}}
+}
 </script>
 """
 

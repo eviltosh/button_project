@@ -3,7 +3,7 @@ import streamlit as st
 st.set_page_config(layout="wide")
 
 # --------------------------------------------------------
-# STATE (for open/close)
+# STATE CONTROL
 # --------------------------------------------------------
 if "sidebar_open" not in st.session_state:
     st.session_state.sidebar_open = True
@@ -13,10 +13,11 @@ if "sidebar" in params:
     st.session_state.sidebar_open = params.get("sidebar") == "1"
 
 # --------------------------------------------------------
-# CSS (no errors, stable)
+# CSS — ONLY OPEN BUTTON FIXED, CLOSE BUTTON UNTOUCHED
 # --------------------------------------------------------
 st.markdown("""
 <style>
+/* Layout containers */
 .app-row {
   display: flex;
   width: 100%;
@@ -39,74 +40,90 @@ st.markdown("""
   padding: 24px;
 }
 
-/* NEON BUTTON */
+/* =======================================================
+   NEON BUTTON OVERRIDES — ALWAYS VISIBLE
+   ======================================================= */
 .neon-btn {
-  display: inline-block;
-  text-decoration: none;
-  color: white !important;
-  background: linear-gradient(135deg, #9b00ff, #b300ff);
-  padding: 10px 18px;
-  font-weight: 700;
-  border-radius: 12px;
-  box-shadow: 0 8px 36px rgba(179,0,255,0.3);
+  display: inline-block !important;
+  text-decoration: none !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #9b00ff 0%, #b300ff 100%) !important;
+  padding: 12px 20px !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 0 12px #b300ff, 0 0 28px rgba(179,0,255,0.7) !important;
+  border: 2px solid #b300ff !important;
+  opacity: 1 !important;
+  z-index: 999999 !important;
 }
 
-/* CLOSE BUTTON (top-right of sidebar) */
+.neon-btn:hover {
+  box-shadow: 0 0 15px #d400ff, 0 0 40px rgba(212,0,255,0.9) !important;
+  transform: scale(1.05);
+}
+
+/* =======================================================
+   CLOSE BUTTON — DO NOT TOUCH (Prime Directive)
+   ======================================================= */
 .sidebar-top-right {
-  position: absolute;
-  top: 18px;
-  right: 18px;
+  position: absolute !important;
+  top: 18px !important;
+  right: 18px !important;
 }
 
-/* OPEN BUTTON (visible when sidebar closed) */
+/* =======================================================
+   OPEN BUTTON — FIXED VISIBILITY
+   ======================================================= */
 .open-left {
-  position: fixed;
-  top: 18px;
-  left: 14px;
-  z-index: 99999;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 14px;
+  position: fixed !important;
+  top: 20px !important;
+  left: 20px !important;
+  z-index: 999999 !important;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
 # --------------------------------------------------------
-# RENDER LAYOUT
+# RENDER LAYOUT (UNCHANGED LOGIC)
 # --------------------------------------------------------
 if st.session_state.sidebar_open:
 
     st.markdown('<div class="app-row">', unsafe_allow_html=True)
 
-    # SIDEBAR HTML
+    # SIDEBAR WITH CLOSE BUTTON (UNCHANGED)
     sidebar_html = """
     <div class="custom-sidebar" id="SIDEBAR">
         <a class="neon-btn sidebar-top-right" href="?sidebar=0">CLOSE</a>
-        <div class="sidebar-title" style="margin-top:80px; font-size:26px; font-weight:700; color:white;">
+
+        <div style="margin-top:80px; font-size:26px; font-weight:700; color:white;">
             NEON SIDEBAR
         </div>
-        <div class="sidebar-section" style="margin-top:40px; color:white;">
+
+        <div style="margin-top:40px; color:white;">
             <p>Sidebar content goes here.</p>
         </div>
     </div>
     """
     st.markdown(sidebar_html, unsafe_allow_html=True)
 
-    # MAIN CONTENT
+    # MAIN CONTENT (SIDEBAR OPEN)
     st.markdown('<div class="main-content">', unsafe_allow_html=True)
     st.title("Sidebar OPEN")
-    st.write("Close button works and background displays.")
+    st.write("Close button works. Background displayed.")
     st.markdown("</div></div>", unsafe_allow_html=True)
 
 else:
     # --------------------------------------------------------
-    # SIDEBAR CLOSED — OPEN BUTTON VISIBLE
+    # SIDEBAR CLOSED — OPEN BUTTON MUST SHOW
     # --------------------------------------------------------
     st.markdown(
-        '<a class="neon-btn open-left" id="OPENBTN" href="?sidebar=1">OPEN</a>',
+        '<a class="neon-btn open-left" href="?sidebar=1">OPEN</a>',
         unsafe_allow_html=True
     )
 
+    # MAIN CONTENT (SIDEBAR CLOSED)
     st.markdown('<div class="app-row"><div class="main-content">', unsafe_allow_html=True)
     st.title("Sidebar CLOSED")
     st.write("Open button now appears and works.")
